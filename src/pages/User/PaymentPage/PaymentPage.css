@@ -1,159 +1,171 @@
+.container-xl {
+    margin: 0 auto;
+    padding: 40px 20px;
+    width: 100%;
+    max-width: 1200px;
+}
+
 .container-xl-pay {
     display: flex;
+    flex-wrap: wrap;
+    gap: 20px;
 }
 
 .PaymentInfor {
-    width: 670px;
-    height: 581px;
-    margin-left: 50px;
-    flex-shrink: 0;
-    border-radius: 15px;
-    margin-top: 30px;
-    background: var(--White, #FFF);
-    box-shadow: 0px 0px 4px 0px var(--dropshadow, rgba(32, 60, 22, 0.25));
+    flex: 1;
+    min-width: 300px;
+    padding: 20px;
+    background-color: #fff;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    border-radius: 8px;
 }
 
 .pThongtin {
-    color: #3A060E;
-    font-family: Poppins;
     font-size: 20px;
-    font-style: normal;
     font-weight: 600;
-    line-height: normal;
-    padding-top: 20px;
-    padding-left: 40px;
+    margin-bottom: 20px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid #eee;
+    color: #333;
 }
 
-.PayHolder {
-    display: flex;
-    margin-top: 40px;
-    margin-left: 40px;
+/* Payment Method Selection */
+.payment-method-selection {
+    margin: 15px 0;
+    padding: 15px;
+    border: 1px solid #eee;
+    border-radius: 6px;
+    background-color: #f9f9f9;
 }
 
-.Bank {
-    border: none;
+.payment-method-option {
     display: flex;
-    width: 260px;
-    height: 60px;
-    padding: 16px 20px;
-    justify-content: space-between;
     align-items: center;
-    flex-shrink: 0;
-    border-radius: 15px;
-    background: #FFF;
-    color: #3A060E;
-    box-shadow: 0px 0px 4px 0px var(--dropshadow, rgba(32, 60, 22, 0.25));
+    margin-bottom: 12px;
+    padding: 10px;
+    border-radius: 4px;
+    transition: background-color 0.2s;
 }
 
-.E-wallet {
-    display: flex;
-    border: none;
-    width: 260px;
-    height: 60px;
-    padding: 16px 20px;
-    justify-content: space-between;
-    align-items: center;
-    flex-shrink: 0;
-    border-radius: 15px;
-    background: #FFF;
-    margin-left: 55px;
-    color: #3A060E;
-    box-shadow: 0px 0px 4px 0px var(--dropshadow, rgba(32, 60, 22, 0.25));
+.payment-method-option:hover {
+    background-color: #f0f0f0;
 }
 
-.inputH1 {
-    display: flex;
-    margin-left: 40px;
-    margin-top: 96px;
+.payment-method-option input[type="radio"] {
+    margin-right: 10px;
+    cursor: pointer;
 }
 
-.input1,
-.input2 {
-    width: 260px;
-    height: 60px;
-    flex-shrink: 0;
-    border: none;
-    border-radius: 15px;
-    color: #3A060E;
-    box-shadow: 0px 0px 4px 0px var(--dropshadow, rgba(32, 60, 22, 0.25));
-    margin-bottom: 10px;
-}
-
-.inputSdt {
-    /* margin-left: 55px; */
-    display: grid;
-}
-
-.customBtn2 {
-    display: flex;
-    width: 130px;
-    padding: 8px 16px;
-    justify-content: center;
-    align-items: center;
-    gap: 10px;
-    border-radius: 50px;
-    background: #3A060E;
-    color: #B1E321;
-    text-align: center;
-    font-family: Poppins;
+.payment-method-option label {
     font-size: 16px;
-    font-style: normal;
-    font-weight: 600;
-    line-height: 28px;
-    /* 175% */
+    cursor: pointer;
+    flex: 1;
+}
+
+.VnpayHolder {
+    padding: 15px 0;
+}
+
+.VnpayTitle, .CodTitle {
+    font-size: 18px;
+    margin-bottom: 10px;
+    color: #2a52be;
+}
+
+.VnpayDescription, .CodDescription {
+    font-size: 14px;
+    color: #555;
+    margin-bottom: 15px;
+}
+
+.CodHolder {
+    padding: 15px 0;
+}
+
+.CodInfo {
+    padding: 15px;
+    background-color: #f9f9f9;
+    border: 1px solid #eee;
+    border-radius: 6px;
+    margin-top: 10px;
+}
+
+.CodInfo p {
+    margin-bottom: 8px;
+    font-size: 14px;
+}
+
+select.BankCode,
+select.Language {
+    padding: 12px;
+    border: 1px solid #ddd;
+    border-radius: 6px;
+    font-size: 15px;
+    background-color: #f9f9f9;
+    transition: border-color 0.3s;
+}
+
+select.BankCode:focus,
+select.Language:focus {
+    border-color: #2a52be;
+    outline: none;
 }
 
 .Button-area-pay {
-    margin-top: 60px;
     display: flex;
-    margin-left: 328px;
+    justify-content: space-between;
+    margin-top: 30px;
 }
 
+.button1,
 .button2 {
-    margin-left: 20px;
+    flex: 1;
+    padding: 0 10px;
+}
+
+.customBtn2 {
+    background-color: #2a52be !important;
+    color: white !important;
 }
 
 .final-order {
-    width: 500px;
-    height: auto;
-    flex-shrink: 0;
-    margin-left: 30px;
-    margin-top: 30px;
-    border-radius: 15px;
-    background: var(--White, #FFF);
-    box-shadow: 0px 0px 4px 0px var(--dropshadow, rgba(32, 60, 22, 0.25));
-
-}
-.footerAreaPayment{
-    width: 500px;
-height: 146px;
-flex-shrink: 0;
-border-radius: 0px 0px 15px 15px;
-background: var(--button-color, #B1E321);
-margin-top:20px;
-padding-top: 10px;
+    flex: 1;
+    min-width: 300px;
+    padding: 20px;
+    background-color: #fff;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    border-radius: 8px;
 }
 
-
-.tamtinh1,
-.tamtinhVanChuyen1{
-    color: #3A060E;
-font-family: Poppins;
-font-size: 18px;
-font-style: normal;
-font-weight: 400;
-line-height: normal;
-margin-left: 20px;
+.footerAreaPayment {
+    padding: 15px;
+    border-top: 1px solid #eee;
+    margin-top: 20px;
 }
+
+.tamtinh,
+.tamtinhVanChuyen {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
 .tamtinh2,
-.tamtinhVanChuyen2{
-    color: #3A060E;
+.tamtinhVanChuyen2 {
+    font-weight: 600;
+}
 
-/* Font_Title */
-font-family: Poppins;
-font-size: 20px;
-font-style: normal;
-font-weight: 700;
-line-height: normal;
-margin-left: 350px;
+.tamtinhVanChuyen2 {
+    color: #e94560;
+    font-size: 18px;
+}
+
+@media (max-width: 768px) {
+    .container-xl-pay {
+        flex-direction: column;
+    }
+
+    .footerAreaPayment {
+        padding: 10px;
+    }
 }

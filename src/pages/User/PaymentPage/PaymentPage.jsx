@@ -36,129 +36,86 @@ const PaymentPage = () => {
     };
   });
 
-  const [paymentType, setPaymentType] = useState("bank"); // "bank", "wallet", or "vnpay"
-  const [paymentInfo, setPaymentInfo] = useState({
-    userBank: "",
-    userBankNumber: "",
-    phoneNumber: "",
-    wallet: "",
-  });
   const [vnpayOptions, setVnpayOptions] = useState({
     bankCode: "",
     language: "vn"
   });
 
-  const handlePaymentTypeChange = (e) => {
-    setPaymentType(e.target.value);
-    setPaymentInfo({
-      ...paymentInfo,
-      userBank: "",
-      userBankNumber: "",
-      wallet: "",
-    }); // Reset thông tin
-  };
-
-  const handleInputChange = (field) => (e) => {
-    const value = e.target.value;
-    if (field === "phoneNumber" && !/^\d*$/.test(value)) return;
-    setPaymentInfo((prev) => ({ ...prev, [field]: value }));
-  };
+  // Thêm state cho phương thức thanh toán
+  const [selectedPaymentMethod, setSelectedPaymentMethod] = useState("vnpay");
 
   const handleVnpayOptionChange = (field) => (e) => {
     setVnpayOptions((prev) => ({ ...prev, [field]: e.target.value }));
   };
 
-  const [value, setValue] = useState("");
-  const [phoneNumber, setPhoneNumber] = useState("");
-  const [error, setError] = useState("");
-  const handleChange1 = (e) => {
-    const value2 = e.target.value;
-    // Kiểm tra chỉ nhập số và không vượt quá 10 ký tự
-    if (/^\d{0,10}$/.test(value2)) {
-      setPhoneNumber(value2);
-      setError("");
-    }
-  };
-  const handleChange2 = (e) => {
-    const inputValue = e.target.value;
-
-    // Chỉ cho phép nhập các ký tự số
-    if (/^\d*$/.test(inputValue)) {
-      setValue(inputValue);
-    }
+  const handlePaymentMethodChange = (method) => {
+    setSelectedPaymentMethod(method);
   };
 
-  const handleBlur = () => {
-    // Kiểm tra độ dài chính xác là 10 số
-    if (phoneNumber.length !== 10) {
-      setError("Số điện thoại phải bao gồm đúng 10 số.");
-    } else {
-      setError(""); // Xóa lỗi nếu nhập đúng
-    }
-  };
   //Su kien click
   const handleClickBack = () => {
     navigate("/order-information", { state: { ...location.state } });
   };
   console.log("orderId", lastOrder?.orderId);
 
-  const handleClickPay = async () => {
+  // Xử lý thanh toán COD
+  const handleCodPayment = async () => {
     try {
-      if (paymentType === "vnpay") {
-        // Xử lý thanh toán VNPay
-        const vnpayData = {
-          amount: lastOrder.totalItemPrice + lastOrder.shippingPrice,
-          orderInfo: `Thanh toan don hang ${lastOrder?.orderId}`,
-          bankCode: vnpayOptions.bankCode,
-          language: vnpayOptions.language,
-          orderId: lastOrder?.orderId
-        };
-
-        const response = await PaymentService.createVnpayPayment(vnpayData);
-
-        if (response?.status === "OK" && response?.code === '00') {
-          // Chuyển hướng đến cổng thanh toán VNPay
-          window.location.href = response.data;
-        } else {
-          alert("Không thể tạo liên kết thanh toán. Vui lòng thử lại.");
-        }
-        return;
-      }
-
-      // Xử lý thanh toán truyền thống (bank/wallet)
-      if (!paymentInfo.userBank || !paymentInfo.userBankNumber) {
-        alert("Vui lòng điền đầy đủ thông tin thanh toán!");
-        return;
-      }
-
-      const paymentData = {
-        paymentCode: `PAY-${Date.now()}`, // Sinh mã thanh toán
-        userBank: paymentInfo.userBank,
-        userBankNumber: paymentInfo.userBankNumber,
-        paymentMethod: paymentType,
-        ...(paymentType === "bank"
-          ? {
-              userBank: paymentInfo.userBank,
-              userBankNumber: paymentInfo.userBankNumber,
-            }
-          : { wallet: paymentInfo.wallet }),
-        orderId: lastOrder?.orderId, // Gắn ID đơn hàng
+      // Tạo dữ liệu thanh toán COD
+      const codPaymentData = {
+        orderId: lastOrder?.orderId,
+        amount: lastOrder.totalItemPrice + lastOrder.shippingPrice,
+        paymentMethod: "COD"
       };
 
-      localStorage.setItem("paymentData", JSON.stringify(paymentData));
+      console.log("Gửi dữ liệu thanh toán COD:", codPaymentData);
 
-      const response = await PaymentService.createPayment(paymentData);
+      // Gọi API để cập nhật trạng thái đơn hàng thành "đang xử lý" với phương thức COD
+      const response = await PaymentService.processCodPayment(codPaymentData);
 
       if (response?.status === "OK") {
-        alert("Đã lưu thông tin thanh toán!");
-
-        navigate("/banking-info", {
+        // Chuyển hướng đến trang đặt hàng thành công
+        navigate("/payment/result", {
           state: {
-            paymentCode: response.data.paymentCode, // Mã thanh toán từ API
-          },
+            orderId: lastOrder?.orderId,
+            paymentMethod: "COD",
+            amount: lastOrder.totalItemPrice + lastOrder.shippingPrice
+          }
         });
       } else {
-        alert("Thanh toán thất bại. Vui lòng thử lại.");
+        alert("Không thể xử lý đơn hàng COD. Vui lòng thử lại.");
+      }
+    } catch (error) {
+      console.error("Error in handleCodPayment:", error);
+      alert("Đã xảy ra lỗi khi xử lý COD. Vui lòng thử lại.");
+    }
+  };
+
+  const handleClickPay = async () => {
+    if (selectedPaymentMethod === "cod") {
+      await handleCodPayment();
+      return;
+    }
+
+    try {
+      // Xử lý thanh toán VNPay
+      const vnpayData = {
+        amount: lastOrder.totalItemPrice + lastOrder.shippingPrice,
+        orderInfo: `Thanh_toan_don_hang_${lastOrder?.orderId}`,
+        bankCode: vnpayOptions.bankCode,
+        language: vnpayOptions.language,
+        orderId: lastOrder?.orderId
+      };
+
+      console.log("Gửi dữ liệu thanh toán:", vnpayData);
+
+      const response = await PaymentService.createPayment(vnpayData);
+
+      if (response?.status === "OK" && response?.code === '00') {
+        // Chuyển hướng đến cổng thanh toán VNPay
+        window.location.href = response.data;
+      } else {
+        alert("Không thể tạo liên kết thanh toán. Vui lòng thử lại.");
       }
     } catch (error) {
       console.error("Error in handleClickPay:", error);
@@ -172,120 +129,41 @@ const PaymentPage = () => {
         {/* =========================THONG TIN THANH TOAN=========================        */}
         <div className="PaymentInfor">
           <p className="pThongtin">Thông tin thanh toán</p>
-          {/* ==========Ngan hang-Vi dien tu========= */}
-          {/* Chọn hình thức thanh toán */}
-          <div
-            className="PaymentTypeHolder"
-            style={{
-              display: "flex",
-              justifyContent: "space-between",
-              padding: "10px 20px",
-            }}
-          >
-            <label>
+
+          {/* Payment Method Selection */}
+          <div className="payment-method-selection">
+            <div className="payment-method-option">
               <input
                 type="radio"
-                value="bank"
-                checked={paymentType === "bank"}
-                onChange={handlePaymentTypeChange}
-              />
-              Ngân hàng
-            </label>
-            <label>
-              <input
-                type="radio"
-                value="wallet"
-                checked={paymentType === "wallet"}
-                onChange={handlePaymentTypeChange}
-              />
-              Ví điện tử
-            </label>
-            <label>
-              <input
-                type="radio"
+                id="vnpay"
+                name="paymentMethod"
                 value="vnpay"
-                checked={paymentType === "vnpay"}
-                onChange={handlePaymentTypeChange}
+                checked={selectedPaymentMethod === "vnpay"}
+                onChange={() => handlePaymentMethodChange("vnpay")}
               />
-              VNPay
-            </label>
+              <label htmlFor="vnpay">Thanh toán qua VNPay</label>
+            </div>
+
+            <div className="payment-method-option">
+              <input
+                type="radio"
+                id="cod"
+                name="paymentMethod"
+                value="cod"
+                checked={selectedPaymentMethod === "cod"}
+                onChange={() => handlePaymentMethodChange("cod")}
+              />
+              <label htmlFor="cod">Thanh toán khi nhận hàng (COD)</label>
+            </div>
           </div>
 
-          {/* Form Ngân hàng */}
-          {paymentType === "bank" && (
-            <div className="BankHolder ">
-              <select
-                className="Bank"
-                name="Bank"
-                value={paymentInfo.userBank}
-                onChange={handleInputChange("userBank")}
-                style={{
-                  width: "100%",
-                  margin: "10px 0",
-                }}
-              >
-                <option value="" disabled>
-                  Chọn ngân hàng
-                </option>
-                <option value="vietcombank">Vietcombank</option>
-                <option value="techcombank">Techcombank</option>
-              </select>
-              <input
-                type="text"
-                className="input1"
-                placeholder="Nhập số tài khoản"
-                value={paymentInfo.userBankNumber}
-                onChange={handleInputChange("userBankNumber")}
-                style={{
-                  width: "100%",
-                }}
-              />
-            </div>
-          )}
-
-          {/* Form Ví điện tử */}
-          {paymentType === "wallet" && (
-            <div className="WalletHolder">
-              <select
-                className="E-wallet"
-                name="Wallet"
-                value={paymentInfo.userBank}
-                onChange={handleInputChange("wallet")}
-                style={{
-                  width: "100%",
-                  margin: "10px 0",
-                }}
-              >
-                <option value="" disabled>
-                  Chọn ví điện tử
-                </option>
-                <option value="momo">Momo</option>
-                <option value="zalopay">Zalo Pay</option>
-              </select>
-              <div className="inputSdt">
-                <span>
-                  <input
-                    type="text"
-                    className="input2"
-                    placeholder="Nhập số điện thoại"
-                    onBlur={handleBlur}
-                    //   onChange={handleChange1}
-                    //   value={phoneNumber}
-                    value={paymentInfo.userBankNumber}
-                    onChange={handleInputChange("phoneNumber")}
-                    style={{
-                      width: "100%",
-                    }}
-                  ></input>
-                </span>
-                <span style={{ color: "red", fontSize: "12px" }}>{error}</span>
-              </div>
-            </div>
-          )}
-
-          {/* Form VNPay */}
-          {paymentType === "vnpay" && (
+          {/* VNPay Options - Only show if VNPay is selected */}
+          {selectedPaymentMethod === "vnpay" && (
             <div className="VnpayHolder">
+              <h3 className="VnpayTitle">Thanh toán qua VNPay</h3>
+              <p className="VnpayDescription">
+                Quý khách sẽ được chuyển đến cổng thanh toán VNPay để hoàn tất quá trình thanh toán
+              </p>
               <select
                 className="BankCode"
                 name="BankCode"
@@ -293,7 +171,7 @@ const PaymentPage = () => {
                 onChange={handleVnpayOptionChange("bankCode")}
                 style={{
                   width: "100%",
-                  margin: "10px 0",
+                  margin: "15px 0",
                 }}
               >
                 <option value="">Hiển thị cổng thanh toán VNPay</option>
@@ -314,15 +192,28 @@ const PaymentPage = () => {
                 onChange={handleVnpayOptionChange("language")}
                 style={{
                   width: "100%",
-                  margin: "10px 0",
+                  margin: "10px 0 20px",
                 }}
               >
                 <option value="vn">Tiếng Việt</option>
                 <option value="en">Tiếng Anh</option>
               </select>
-              <p style={{ fontSize: "14px", color: "#888", padding: "10px" }}>
-                Chọn "Thanh toán" để tiếp tục đến cổng thanh toán VNPay
+            </div>
+          )}
+
+          {/* COD Information - Only show if COD is selected */}
+          {selectedPaymentMethod === "cod" && (
+            <div className="CodHolder">
+              <h3 className="CodTitle">Thanh toán khi nhận hàng (COD)</h3>
+              <p className="CodDescription">
+                Quý khách sẽ thanh toán khi nhận hàng. Vui lòng chuẩn bị đúng số tiền khi nhận hàng.
               </p>
+              <div className="CodInfo">
+                <p><strong>Người nhận:</strong> {shippingAddress?.familyName} {shippingAddress?.userName}</p>
+                <p><strong>Số điện thoại:</strong> {shippingAddress?.userPhone}</p>
+                <p><strong>Địa chỉ:</strong> {shippingAddress?.userAddress}, {shippingAddress?.userWard}, {shippingAddress?.userDistrict}, {shippingAddress?.userCity}</p>
+                <p><strong>Email:</strong> {shippingAddress?.userEmail}</p>
+              </div>
             </div>
           )}
 
@@ -335,7 +226,9 @@ const PaymentPage = () => {
             </div>
             <div className="button2">
               <ButtonComponent className="customBtn2" onClick={handleClickPay}>
-                {paymentType === "vnpay" ? "Thanh toán qua VNPay" : "Thanh toán"}
+                {selectedPaymentMethod === "vnpay"
+                  ? "Thanh toán qua VNPay"
+                  : "Xác nhận đặt hàng COD"}
               </ButtonComponent>
             </div>
           </div>

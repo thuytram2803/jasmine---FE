@@ -1,14 +1,11 @@
 .payment-result-container {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  padding: 40px 20px;
-  min-height: 70vh;
+  max-width: 800px;
+  margin: 40px auto;
+  padding: 0 20px;
 }
 
 .payment-result-card {
-  width: 100%;
-  max-width: 700px;
+  background: #fff;
   border-radius: 8px;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
   overflow: hidden;
@@ -16,67 +13,86 @@
 
 .payment-result-header {
   padding: 20px;
-  color: white;
   text-align: center;
 }
 
-.success .payment-result-header {
-  background-color: #28a745;
-}
-
-.error .payment-result-header {
-  background-color: #dc3545;
+.payment-result-header h2 {
+  margin: 0;
+  font-size: 24px;
 }
 
 .payment-result-body {
-  padding: 30px;
-  background-color: white;
+  padding: 20px;
+  border-top: 1px solid #eee;
+  border-bottom: 1px solid #eee;
 }
 
 .payment-result-body p {
-  margin-bottom: 15px;
-  font-size: 16px;
+  margin: 10px 0;
   line-height: 1.5;
 }
 
 .payment-result-buttons {
   display: flex;
-  justify-content: space-between;
-  padding: 20px 30px;
-  background-color: #f8f9fa;
+  justify-content: center;
+  gap: 20px;
+  padding: 20px;
+}
+
+.success .payment-result-header {
+  background-color: #e8f5e9;
+  color: #2e7d32;
+}
+
+.error .payment-result-header {
+  background-color: #ffebee;
+  color: #c62828;
 }
 
 .payment-result-loading {
-  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
   padding: 40px;
-  background-color: white;
-  border-radius: 8px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-}
-
-.payment-result-error {
-  text-align: center;
-  padding: 40px;
-  background-color: white;
+  background: #fff;
   border-radius: 8px;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
 }
 
 .spinner {
   border: 4px solid rgba(0, 0, 0, 0.1);
-  width: 36px;
-  height: 36px;
   border-radius: 50%;
-  border-left-color: #09f;
+  border-top: 4px solid #3498db;
+  width: 30px;
+  height: 30px;
   animation: spin 1s linear infinite;
-  margin: 0 auto 20px;
+  margin-bottom: 20px;
 }
 
 @keyframes spin {
-  0% {
-    transform: rotate(0deg);
-  }
-  100% {
-    transform: rotate(360deg);
-  }
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+.payment-result-error {
+  padding: 20px;
+  background: #fff;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  text-align: center;
+}
+
+.payment-result-error h2 {
+  color: #c62828;
+}
+
+.cod-instruction {
+  background-color: #fff8e1;
+  border-left: 4px solid #ffc107;
+  padding: 12px 15px;
+  margin: 15px 0;
+  border-radius: 4px;
+  font-style: italic;
+  font-weight: 500;
 }

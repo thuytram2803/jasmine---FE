@@ -41,25 +41,34 @@
 .payment-method-option {
     display: flex;
     align-items: center;
-    margin-bottom: 12px;
+    margin-bottom: 15px;
     padding: 10px;
-    border-radius: 4px;
-    transition: background-color 0.2s;
+    border: 1px solid #e9ecef;
+    border-radius: 8px;
+    transition: all 0.3s ease;
 }
 
 .payment-method-option:hover {
-    background-color: #f0f0f0;
+    background-color: #f8f9fa;
 }
 
 .payment-method-option input[type="radio"] {
     margin-right: 10px;
-    cursor: pointer;
 }
 
 .payment-method-option label {
     font-size: 16px;
+    color: #333;
     cursor: pointer;
-    flex: 1;
+}
+
+/* ZaloPay specific styles */
+.payment-method-option[for="zalopay"] {
+    border-color: #0068ff;
+}
+
+.payment-method-option[for="zalopay"]:hover {
+    background-color: #f0f7ff;
 }
 
 .VnpayHolder {

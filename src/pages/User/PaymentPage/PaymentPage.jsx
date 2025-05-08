@@ -91,35 +91,96 @@ const PaymentPage = () => {
     }
   };
 
+  // Xử lý thanh toán ZaloPay
+  const handleZaloPayPayment = async () => {
+    try {
+      const paymentData = {
+        orderId: lastOrder?.orderId,
+        amount: lastOrder.totalItemPrice + lastOrder.shippingPrice,
+        description: `Thanh toan don hang ${lastOrder?.orderId}`
+      };
+
+      console.log("Gửi dữ liệu thanh toán ZaloPay:", paymentData);
+      const response = await PaymentService.createZaloPayPayment(paymentData);
+      console.log("Kết quả tạo thanh toán ZaloPay:", response);
+
+      if (response?.status === "OK") {
+        window.location.href = response.data.orderUrl;
+      } else {
+        alert("Không thể tạo thanh toán ZaloPay. Vui lòng thử lại.");
+      }
+    } catch (error) {
+      console.error("Error in handleZaloPayPayment:", error);
+      alert("Đã xảy ra lỗi. Vui lòng thử lại.");
+    }
+  };
+
+  // Xử lý kết quả thanh toán
+  const handlePaymentResult = async (params) => {
+    try {
+      console.log("Xử lý kết quả thanh toán:", params);
+      const { app_trans_id, status, message } = params;
+
+      if (status === "1") {
+        // Thanh toán thành công
+        navigate("/payment/result", {
+          state: {
+            orderId: lastOrder?.orderId,
+            paymentMethod: "ZALOPAY",
+            amount: lastOrder.totalItemPrice + lastOrder.shippingPrice,
+            status: "success",
+            message: "Thanh toán thành công"
+          }
+        });
+      } else {
+        // Thanh toán thất bại
+        navigate("/payment/result", {
+          state: {
+            orderId: lastOrder?.orderId,
+            paymentMethod: "ZALOPAY",
+            amount: lastOrder.totalItemPrice + lastOrder.shippingPrice,
+            status: "failed",
+            message: message || "Thanh toán thất bại"
+          }
+        });
+      }
+    } catch (error) {
+      console.error("Error in handlePaymentResult:", error);
+      alert("Đã xảy ra lỗi khi xử lý kết quả thanh toán. Vui lòng thử lại.");
+    }
+  };
+
   const handleClickPay = async () => {
     if (selectedPaymentMethod === "cod") {
       await handleCodPayment();
       return;
     }
 
-    try {
-      // Xử lý thanh toán VNPay
-      const vnpayData = {
-        amount: lastOrder.totalItemPrice + lastOrder.shippingPrice,
-        orderInfo: `Thanh_toan_don_hang_${lastOrder?.orderId}`,
-        bankCode: vnpayOptions.bankCode,
-        language: vnpayOptions.language,
-        orderId: lastOrder?.orderId
-      };
+    if (selectedPaymentMethod === "vnpay") {
+      try {
+        const paymentData = {
+          orderId: lastOrder?.orderId,
+          amount: Math.round(lastOrder.totalItemPrice + lastOrder.shippingPrice),
+          bankCode: vnpayOptions.bankCode || '',
+          language: vnpayOptions.language || 'vn',
+          orderInfo: `Thanh_toan_don_hang_${lastOrder?.orderId}`
+        };
 
-      console.log("Gửi dữ liệu thanh toán:", vnpayData);
-
-      const response = await PaymentService.createPayment(vnpayData);
-
-      if (response?.status === "OK" && response?.code === '00') {
-        // Chuyển hướng đến cổng thanh toán VNPay
-        window.location.href = response.data;
-      } else {
-        alert("Không thể tạo liên kết thanh toán. Vui lòng thử lại.");
+        console.log("Sending VNPay payment data:", paymentData);
+        const response = await PaymentService.createPayment(paymentData);
+        if (response?.status === "OK") {
+          window.location.href = response.data;
+        } else {
+          alert("Không thể tạo thanh toán VNPay. Vui lòng thử lại.");
+        }
+      } catch (error) {
+        console.error("Error in handleClickPay:", error);
+        alert("Đã xảy ra lỗi. Vui lòng thử lại.");
       }
-    } catch (error) {
-      console.error("Error in handleClickPay:", error);
-      alert("Đã xảy ra lỗi. Vui lòng thử lại.");
+    }
+
+    if (selectedPaymentMethod === "zalopay") {
+      await handleZaloPayPayment();
     }
   };
 
@@ -142,6 +203,18 @@ const PaymentPage = () => {
                 onChange={() => handlePaymentMethodChange("vnpay")}
               />
               <label htmlFor="vnpay">Thanh toán qua VNPay</label>
+            </div>
+
+            <div className="payment-method-option">
+              <input
+                type="radio"
+                id="zalopay"
+                name="paymentMethod"
+                value="zalopay"
+                checked={selectedPaymentMethod === "zalopay"}
+                onChange={() => handlePaymentMethodChange("zalopay")}
+              />
+              <label htmlFor="zalopay">Thanh toán qua ZaloPay</label>
             </div>
 
             <div className="payment-method-option">
@@ -225,9 +298,22 @@ const PaymentPage = () => {
               </ButtonComponent>
             </div>
             <div className="button2">
-              <ButtonComponent className="customBtn2" onClick={handleClickPay}>
+              <ButtonComponent
+                className="customBtn2"
+                onClick={() => {
+                  if (selectedPaymentMethod === "vnpay") {
+                    handleClickPay();
+                  } else if (selectedPaymentMethod === "zalopay") {
+                    handleZaloPayPayment();
+                  } else if (selectedPaymentMethod === "cod") {
+                    handleCodPayment();
+                  }
+                }}
+              >
                 {selectedPaymentMethod === "vnpay"
                   ? "Thanh toán qua VNPay"
+                  : selectedPaymentMethod === "zalopay"
+                  ? "Thanh toán qua ZaloPay"
                   : "Xác nhận đặt hàng COD"}
               </ButtonComponent>
             </div>

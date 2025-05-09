@@ -96,3 +96,31 @@ export const processCodPayment = async (data) => {
     }
   }
 };
+
+// ZaloPay Payment Service
+export const createZaloPayPayment = async (data) => {
+  try {
+    const response = await axios.post(
+      `${process.env.REACT_APP_API_URL_BACKEND}/payment/create-zalopay`,
+      data
+    );
+    return response.data;
+  } catch (error) {
+    console.error('Error creating ZaloPay payment:', error);
+    throw error;
+  }
+};
+
+// Verify ZaloPay payment result
+export const verifyZaloPayPayment = async (params) => {
+  try {
+    const response = await axios.get(
+      `${process.env.REACT_APP_API_URL_BACKEND}/payment/zalopay-result`,
+      { params }
+    );
+    return response.data;
+  } catch (error) {
+    console.error('Error verifying ZaloPay payment:', error);
+    throw error;
+  }
+};

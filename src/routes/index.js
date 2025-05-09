@@ -18,7 +18,6 @@ import EnterOTP from "../pages/ForgotPasswordPage/pages/EnterOTP";
 import LogInPage from "../pages/LogInPage/LogInPage";
 import NotFoundPage from "../pages/NotFoundPage/NotFoundPage";
 import SignUpPage from "../pages/SignUpPage/SignUpPage";
-import BankingInfoPage from "../pages/User/BankingInfoPage/BankingInfoPage";
 import ContactPage from "../pages/User/ContactPage/ContactPage";
 import HomePage from "../pages/User/HomePage/HomePage";
 import IntroducePage from "../pages/User/IntroducePage/IntroducePage";
@@ -33,6 +32,7 @@ import OrderTrackingPage from "../pages/User/OrderHistoryPage/OrderTrackingPage"
 import UserListPage from "../pages/Admin/CRUDUser/UserListPage/UserListPage";
 import PaymentPage from "../pages/User/PaymentPage/PaymentPage";
 import OrderDetailHistoryPage from "../pages/User/OrderDetailHistoryPage/OrderDetailHistoryPage";
+import PaymentResult from "../pages/User/PaymentResult/PaymentResult";
 import NewsPageAdmin from "../pages/Admin/CRUDNews/NewsPage/NewsPage";
 import AddNews from "../pages/Admin/CRUDNews/AddNews/AddNews";
 import UpdateStatus from "../pages/Admin/CRUDOrderStatus/UpdateStatus/UpdateStatus";
@@ -181,13 +181,6 @@ export const routes = [
   },
 
   {
-    path: "/banking-info",
-    page: BankingInfoPage,
-    isShowHeader: true,
-    isShowFooter: true,
-  },
-
-  {
     path: "/admin/store-info",
     page: StoreInfoPage,
     isShowHeader: true,
@@ -326,6 +319,14 @@ export const routes = [
     isShowHeader: true,
     isShowFooter: true,
   },
+
+  {
+    path: "/payment/result",
+    page: PaymentResult,
+    isShowHeader: true,
+    isShowFooter: true,
+  },
+
   {
     path: "/admin/news",
     page: NewsPageAdmin,

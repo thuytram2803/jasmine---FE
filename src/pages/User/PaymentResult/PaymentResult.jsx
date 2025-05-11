@@ -3,15 +3,20 @@ import { useLocation, useNavigate } from 'react-router-dom';
 import ButtonComponent from "../../../components/ButtonComponent/ButtonComponent";
 import { getPaymentResult, verifyZaloPayPayment } from '../../../services/PaymentService';
 import './PaymentResult.css';
+import { useDispatch, useSelector } from 'react-redux';
+import { removeSelectedFromCart } from '../../../redux/slides/cartSlide';
 
 const PaymentResult = () => {
   const location = useLocation();
   const navigate = useNavigate();
+  const dispatch = useDispatch();
   const [loading, setLoading] = useState(true);
   const [result, setResult] = useState(null);
   const [error, setError] = useState(null);
   const [codPayment, setCodPayment] = useState(null);
   const [paymentMethod, setPaymentMethod] = useState(null);
+  const orderDetails = useSelector((state) => state.order);
+  const selectedProductIds = orderDetails.selectedProductIds || [];
 
   useEffect(() => {
     const verifyPayment = async () => {
@@ -24,6 +29,10 @@ const PaymentResult = () => {
             paymentMethod: "COD"
           });
           setPaymentMethod("COD");
+          // Xóa sản phẩm đã chọn khỏi giỏ hàng khi COD
+          if (selectedProductIds.length > 0) {
+            dispatch(removeSelectedFromCart({ ids: selectedProductIds }));
+          }
           setLoading(false);
           return;
         }
@@ -37,6 +46,10 @@ const PaymentResult = () => {
           const response = await verifyZaloPayPayment(queryParams);
           console.log("ZaloPay verification response:", response);
           setResult(response);
+          // Nếu ZaloPay thanh toán thành công, xóa sản phẩm đã chọn khỏi giỏ hàng
+          if (response?.data?.status === "1" && selectedProductIds.length > 0) {
+            dispatch(removeSelectedFromCart({ ids: selectedProductIds }));
+          }
         }
         // Check for VNPay return
         else if (queryParams.get('vnp_ResponseCode')) {
@@ -44,6 +57,10 @@ const PaymentResult = () => {
           const response = await getPaymentResult(queryParams);
           console.log("VNPay verification response:", response);
           setResult(response);
+          // Nếu VNPay thanh toán thành công, xóa sản phẩm đã chọn khỏi giỏ hàng
+          if (response?.code === "00" && selectedProductIds.length > 0) {
+            dispatch(removeSelectedFromCart({ ids: selectedProductIds }));
+          }
         }
         // If no payment parameters found
         else {
@@ -59,7 +76,7 @@ const PaymentResult = () => {
     };
 
     verifyPayment();
-  }, [location.search, location.state]);
+  }, [location.search, location.state, dispatch, selectedProductIds]);
 
   const getStatusText = (code, method, result) => {
     if (method === "ZALOPAY") {

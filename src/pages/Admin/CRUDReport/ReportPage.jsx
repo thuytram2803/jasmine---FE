@@ -162,25 +162,6 @@ const ReportPage = () => {
 
   const isSelected = (id) => selectedRows.includes(id);
 
-  // Format order code to show as ORD-XXXX (4 digits)
-  const formatOrderCode = (code) => {
-    if (!code) return "";
-
-    // If the format is already ORD-XXXX, just return it
-    if (code.startsWith('ORD-') && code.length <= 8) return code;
-
-    // Extract just the first 4 characters after ORD- prefix
-    if (code.startsWith('ORD-')) {
-      const parts = code.split('-');
-      if (parts.length > 1) {
-        return `ORD-${parts[1].substring(0, 4)}`;
-      }
-    }
-
-    // If it's another format, take first 4 characters
-    return `ORD-${code.substring(0, 4)}`;
-  };
-
   const days = Array.from({ length: 31 }, (_, i) => ({
     label: `Ngày ${i + 1}`,
     value: i + 1,
@@ -303,9 +284,9 @@ const ReportPage = () => {
               </div>
             </div>
 
-            <div class="report-total-container">
-              <div class="report-container">
-                <div class="report-title">
+            <div className="report-total-container">
+              <div className="report-container">
+                <div className="report-title">
                   <table>
                     <tr>
                       <th>TỔNG DOANH THU</th>
@@ -313,17 +294,17 @@ const ReportPage = () => {
                   </table>
                 </div>
 
-                <div class="report-data">
+                <div className="report-data">
                   <table>
                     <tr>
-                      <td>{totalRevenue.toLocaleString()}</td>
+                      <td>{totalRevenue.toLocaleString()} VND</td>
                     </tr>
                   </table>
                 </div>
               </div>
 
-              <div class="report-container">
-                <div class="report-title">
+              <div className="report-container">
+                <div className="report-title">
                   <table>
                     <tr>
                       <th>TỔNG SẢN PHẨM BÁN RA</th>
@@ -331,7 +312,7 @@ const ReportPage = () => {
                   </table>
                 </div>
 
-                <div class="report-data">
+                <div className="report-data">
                   <table>
                     <tr>
                       <td>{totalQuantity}</td>
@@ -402,11 +383,11 @@ const ReportPage = () => {
                       />
                     </th>
                     <th>STT</th>
-                    <th>Mã đơn</th>
-                    <th>Tổng sản phẩm</th>
-                    <th>Thời gian đặt</th>
-                    <th>Thời gian hoàn thành</th>
-                    <th>Tổng tiền</th>
+                    <th>Mã đơn hàng</th>
+                    <th style={{ paddingLeft: '20px' }}>SL</th>
+                    <th>Ngày đặt</th>
+                    <th>Ngày hoàn thành</th>
+                    <th>Thành tiền</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -419,10 +400,10 @@ const ReportPage = () => {
                         />
                       </td>
                       <td>{order.stt}</td>
-                      <td className="order-code" data-has-prefix={order.orderCode?.startsWith('ORD-')}>
-                        {formatOrderCode(order.orderCode)}
+                      <td className="order-code">
+                        <span className="order-code-text">{order.orderCode}</span>
                       </td>
-                      <td>{order.totalProducts}</td>
+                      <td style={{ paddingLeft: '20px' }}>{order.totalProducts}</td>
                       <td>{order.orderDate}</td>
                       <td>{order.completionDate}</td>
                       <td>{order.totalPrice.toLocaleString()} VND</td>

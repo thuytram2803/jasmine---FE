@@ -159,6 +159,7 @@ h2 {
 .table-container {
   max-height: 600px;
   overflow-y: auto;
+  overflow-x: auto;
   margin-top: 20px;
   border: 1px solid #dee2e6;
   border-radius: 4px;
@@ -185,6 +186,7 @@ h2 {
 .order-table {
   width: 100%;
   border-collapse: collapse;
+  table-layout: fixed;
 }
 
 .order-table thead {
@@ -208,49 +210,51 @@ h2 {
 
 /* Column width specifications */
 .order-table th:nth-child(1) {
-  width: 5%;
+  width: 40px;
 }
 
 .order-table th:nth-child(2),
 .order-table td:nth-child(2) {
-  width: 7%;
+  width: 40px;
   text-align: center;
 }
 
 .order-table th:nth-child(3),
 .order-table td:nth-child(3) {
-  width: 15%;
+  width: 20%;
 }
 
 .order-table th:nth-child(4),
 .order-table td:nth-child(4) {
-  width: 15%;
+  width: 14%;
 }
 
 .order-table th:nth-child(5),
 .order-table td:nth-child(5) {
-  width: 18%;
-  text-align: center;
+  width: 16%;
+  display: table-cell;
+  position: static;
+  vertical-align: middle;
 }
 
 .order-table th:nth-child(6),
 .order-table td:nth-child(6),
 .order-table th:nth-child(7),
 .order-table td:nth-child(7) {
-  width: 15%;
+  width: 12%;
   text-align: center;
 }
 
 .order-table th:nth-child(8),
 .order-table td:nth-child(8) {
-  width: 15%;
+  width: 12%;
   text-align: right;
 }
 
+/* Fix alignment in the table cells */
 .order-table th,
 .order-table td {
   padding: 15px 12px;
-  text-align: left;
   vertical-align: middle;
 }
 
@@ -308,17 +312,67 @@ h2 {
   color: var(--brown100);
   white-space: nowrap;
   letter-spacing: 0.5px;
+  overflow: visible;
+  text-overflow: clip;
+  display: block;
+  text-align: left;
+  max-width: none;
+  padding-right: 10px;
 }
 
-/* Status badge styling */
+/* Status badge container */
+.order-table td:nth-child(5) {
+  text-align: center !important;
+  padding: 8px 0;
+}
+
+/* Status badge styling - fix alignment issues */
 .status-badge {
-  padding: 8px 12px;
-  font-size: 1.4rem;
-  font-weight: 500;
+  padding: 6px 8px;
+  font-size: 1rem;
+  font-weight: 600;
   border-radius: 50px;
   text-transform: uppercase;
-  letter-spacing: 0.5px;
-  display: inline-block;
+  letter-spacing: 0.3px;
+  white-space: normal;
+  min-width: 110px;
+  max-width: 90%;
+  line-height: 1.2;
+  word-break: keep-all;
+  margin: 0 auto !important;
+  display: inline-block !important;
+  text-align: center !important;
+}
+
+/* Ensure background colors are applied properly */
+.status-badge.bg-warning {
+  background-color: #FFF4D9 !important;
+  color: #966A2B !important;
+}
+
+.status-badge.bg-info {
+  background-color: #E6F6FF !important;
+  color: #0075B1 !important;
+}
+
+.status-badge.bg-primary {
+  background-color: #E6EEFF !important;
+  color: #0052CC !important;
+}
+
+.status-badge.bg-success {
+  background-color: #E6F7EF !important;
+  color: #006644 !important;
+}
+
+.status-badge.bg-danger {
+  background-color: #FFEBE6 !important;
+  color: #BF2600 !important;
+}
+
+/* Override any conflicting styles */
+.badge {
+  text-align: center !important;
 }
 
 /* Price column styling */
@@ -383,32 +437,6 @@ h2 {
   color: var(--brown100);
 }
 
-/* Status badge styles for different statuses */
-.status-badge.bg-warning {
-  background-color: #FFF4D9;
-  color: #966A2B;
-}
-
-.status-badge.bg-info {
-  background-color: #E6F6FF;
-  color: #0075B1;
-}
-
-.status-badge.bg-primary {
-  background-color: #E6EEFF;
-  color: #0052CC;
-}
-
-.status-badge.bg-success {
-  background-color: #E6F7EF;
-  color: #006644;
-}
-
-.status-badge.bg-danger {
-  background-color: #FFEBE6;
-  color: #BF2600;
-}
-
 /* Responsive adjustments */
 @media (max-width: 992px) {
   .order-list__info {
@@ -452,5 +480,81 @@ h2 {
 
   .table-container {
     overflow-x: auto;
+  }
+}
+
+.order-code-text {
+  font-family: monospace;
+  font-weight: 600;
+  color: var(--brown100);
+  white-space: nowrap;
+  overflow: visible;
+  text-overflow: clip;
+  font-size: 0.9em;
+  width: auto;
+  max-width: none;
+  display: inline-block;
+  min-width: 150px;
+}
+
+/* Status badge container - fix alignment */
+.order-table td:nth-child(5) {
+  padding: 8px 5px;
+  text-align: center !important;
+  vertical-align: middle;
+  min-height: 45px;
+  display: table-cell;
+  position: relative;
+}
+
+/* Badge wrapper to center the badge */
+.order-table td:nth-child(5) .badge {
+  position: static;
+  left: auto;
+  transform: none;
+}
+
+/* Ensure status header is also centered */
+.order-table th:nth-child(5) {
+  text-align: center !important;
+}
+
+/* Improve status badge to be more centered */
+.status-badge {
+  padding: 6px 8px;
+  font-size: 1rem;
+  font-weight: 600;
+  border-radius: 50px;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+  display: inline-block;
+  overflow: visible;
+  white-space: normal;
+  min-width: 110px;
+  max-width: none;
+  line-height: 1.2;
+  word-break: keep-all;
+  text-align: center !important;
+  margin: 0 auto;
+}
+
+/* Status badge styling for different widths */
+@media (min-width: 992px) {
+  .status-badge {
+    min-width: 120px;
+    padding: 6px 10px;
+  }
+}
+
+@media (max-width: 991px) {
+  .status-badge {
+    min-width: 100px;
+    font-size: 0.9rem;
+    padding: 5px 8px;
+  }
+
+  .order-table th:nth-child(5),
+  .order-table td:nth-child(5) {
+    width: 18%; /* Increase width further on smaller screens */
   }
 }

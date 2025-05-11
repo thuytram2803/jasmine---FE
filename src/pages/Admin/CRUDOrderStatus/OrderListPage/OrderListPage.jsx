@@ -293,12 +293,15 @@ const OrderListPage = () => {
                           />
                         </td>
                         <td>{index + 1}</td>
-                        <td className="order-code">{order.orderCode}</td>
+                        <td className="order-code">
+                          <span className="order-code-text">{order.orderCode}</span>
+                        </td>
                         <td>{order.shippingAddress.familyName} {order.shippingAddress.userName}</td>
                         <td>
                           <Badge
                             bg={getStatusBadgeClass(order.status?.statusName)}
                             className="status-badge"
+                            title={order.status?.statusName || "Không xác định"}
                           >
                             {order.status?.statusName || "Không xác định"}
                           </Badge>

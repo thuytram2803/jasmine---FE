@@ -12,7 +12,8 @@ import { getProductsByCategory } from "../../../services/productServices";
 const ViewProductDetailPage = () => {
   const navigate = useNavigate();
   const user = useSelector((state) => state.user);
-  const { state: productData } = useLocation();
+  const location = useLocation();
+  const productData = location.state;
   const dispatch = useDispatch();
 
   const [quantity, setQuantity] = useState(1);
@@ -30,6 +31,19 @@ const ViewProductDetailPage = () => {
     }
   );
 
+  // Update product state when location.state changes
+  useEffect(() => {
+    if (productData) {
+      setProduct(productData);
+      setQuantity(1); // Reset quantity when viewing a new product
+      setAddedToCart(false); // Reset added to cart state
+
+      // Scroll to top when viewing a new product
+      window.scrollTo(0, 0);
+    }
+  }, [productData, location.key]);
+
+  // Initial scroll to top on page load
   useEffect(() => {
     window.scrollTo(0, 0);
   }, []);

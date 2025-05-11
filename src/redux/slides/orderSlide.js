@@ -61,12 +61,14 @@ const orderSlice = createSlice({
 
     setOrderDetails: (state, action) => {
       state.selectedProducts = action.payload.selectedProducts || [];
+      state.selectedProductIds = action.payload.selectedProductIds || [];
       state.shippingAddress = action.payload.shippingAddress || {};
       state.totalPrice = action.payload.totalPrice || 0;
       saveToLocalStorage(state);
     },
     clearOrder: (state) => {
       state.selectedProducts = [];
+      state.selectedProductIds = [];
       state.shippingAddress = {};
       state.totalPrice = 0;
       saveToLocalStorage(state);

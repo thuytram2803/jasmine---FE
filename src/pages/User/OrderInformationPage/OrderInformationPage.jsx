@@ -142,6 +142,18 @@ const OrderInformationPage = () => {
 
   console.log("totalPrice", totalPrice);
 
+  // Lưu danh sách ID sản phẩm đã chọn vào Redux
+  useEffect(() => {
+    if (selectedProducts.length > 0) {
+      // Lưu thông tin đơn hàng vào Redux store
+      dispatch(setOrderDetails({
+        selectedProducts: selectedProducts,
+        selectedProductIds: selectedProducts.map(product => product.id),
+        totalPrice: totalItemPrice + shippingPrice
+      }));
+    }
+  }, [selectedProducts, totalItemPrice, shippingPrice, dispatch]);
+
   useEffect(() => {
     if (isLoggedIn) {
       setShippingAddress((prev) => ({

@@ -3,15 +3,18 @@ import { useLocation, useNavigate } from "react-router-dom";
 import "./PaymentPage.css";
 import ButtonComponent from "../../../components/ButtonComponent/ButtonComponent";
 import ProductInforCustom from "../../../components/ProductInfor/ProductInforCustom";
-import { useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import * as PaymentService from "../../../services/PaymentService";
+import { removeSelectedFromCart } from "../../../redux/slides/cartSlide";
 
 const PaymentPage = () => {
   const location = useLocation();
   const navigate = useNavigate();
+  const dispatch = useDispatch();
   const orderDetails = useSelector((state) => state.order);
   console.log("orderDetails", orderDetails);
   const cart = useSelector((state) => state.cart); // Lấy danh sách sản phẩm từ Redux
+  const selectedProductIds = orderDetails.selectedProductIds || [];
 
   const lastOrder = orderDetails.orders?.[orderDetails.orders.length - 1] || {};
   const {
@@ -74,6 +77,11 @@ const PaymentPage = () => {
       const response = await PaymentService.processCodPayment(codPaymentData);
 
       if (response?.status === "OK") {
+        // Xóa các sản phẩm đã chọn khỏi giỏ hàng khi thanh toán COD thành công
+        if (selectedProductIds.length > 0) {
+          dispatch(removeSelectedFromCart({ ids: selectedProductIds }));
+        }
+
         // Chuyển hướng đến trang đặt hàng thành công
         navigate("/payment/result", {
           state: {
@@ -97,7 +105,7 @@ const PaymentPage = () => {
       const paymentData = {
         orderId: lastOrder?.orderId,
         amount: lastOrder.totalItemPrice + lastOrder.shippingPrice,
-        description: `Thanh toan don hang ${lastOrder?.orderId}`
+        description: `Thanh_toan_don_hang_${lastOrder?.orderId}`
       };
 
       console.log("Gửi dữ liệu thanh toán ZaloPay:", paymentData);
@@ -105,6 +113,8 @@ const PaymentPage = () => {
       console.log("Kết quả tạo thanh toán ZaloPay:", response);
 
       if (response?.status === "OK") {
+        // Không xóa giỏ hàng ở đây, việc xóa sẽ được thực hiện ở trang PaymentResult
+        // sau khi xác nhận thanh toán thành công
         window.location.href = response.data.orderUrl;
       } else {
         alert("Không thể tạo thanh toán ZaloPay. Vui lòng thử lại.");
@@ -169,6 +179,8 @@ const PaymentPage = () => {
         console.log("Sending VNPay payment data:", paymentData);
         const response = await PaymentService.createPayment(paymentData);
         if (response?.status === "OK") {
+          // Không xóa giỏ hàng ở đây, việc xóa sẽ được thực hiện ở trang PaymentResult
+          // sau khi xác nhận thanh toán thành công
           window.location.href = response.data;
         } else {
           alert("Không thể tạo thanh toán VNPay. Vui lòng thử lại.");

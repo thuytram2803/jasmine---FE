@@ -114,18 +114,7 @@ const OrderHistoryPage = () => {
       <div className="container-xl">
         <div className="user-info__container">
           <div className="user-info__bot">
-            {/* <div className="side-menu__info">
-              <SideMenuComponent onClick={handleClickProfile}>
-                Thông tin cá nhân
-              </SideMenuComponent>
-              <SideMenuComponent>Khuyến mãi</SideMenuComponent>
-              <SideMenuComponent onClick={handleClickOrder}>
-                Đơn hàng
-              </SideMenuComponent>
-              <SideMenuComponent onClick={handleLogout}>
-                Đăng xuất
-              </SideMenuComponent>
-            </div> */}
+
             <div className="order-history__info">
               <h2 className="order-history__title">Lịch sử mua hàng</h2>
               {Array.isArray(orders) && orders.length > 0 ? (

@@ -30,11 +30,15 @@ const CartPage = () => {
     return parseFloat(price.replace(/[^0-9.-]+/g, ""));
   };
 
-  const totalAmount = products.reduce((acc, product) => {
-    return acc + calculatePrice(product.price) * product.quantity;
-  }, 0);
-
   const [selectedProducts, setSelectedProducts] = useState([]);
+
+  // Tính tổng tiền dựa trên các sản phẩm đã chọn
+  const totalAmount = products.reduce((acc, product) => {
+    if (selectedProducts.includes(product.id)) {
+      return acc + calculatePrice(product.price) * product.quantity;
+    }
+    return acc;
+  }, 0);
 
   // Check if a product is selected
   const isSelected = (productId) => selectedProducts.includes(productId);

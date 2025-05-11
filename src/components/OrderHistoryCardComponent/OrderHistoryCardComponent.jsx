@@ -15,9 +15,7 @@ const OrderHistoryCardComponent = ({ order }) => {
     navigate(`/order-detail-history/${id}`, { state: { order} }); // Chuyển hướng với dữ liệu
   };
 
-  // const totalAmount = order.products.reduce((acc, product) => {
-  //   return acc + parseInt(product.price) * parseInt(product.quantity); // Tổng tiền của tất cả sản phẩm
-  // }, 0);
+
   const totalAmount = order.totalPrice;
   // console.log("ORDERCOMPONENT", order.orderItems)
   console.log("ORDERCOMPONENT1313", totalAmount)

@@ -68,6 +68,7 @@ const RecommendationCarouselComponent = ({ products }) => {
           productCategory: product.productCategory,
           productPrice: product.productPrice,
         },
+        replace: true
       });
     } else {
       alert("Không tìm thấy sản phẩm!");
@@ -83,7 +84,6 @@ const RecommendationCarouselComponent = ({ products }) => {
               <div
                 key={product._id}
                 className="carousel-item"
-                onClick={() => handleDetail(product)}
               >
                 <CardProduct
                   type="primary"
@@ -91,6 +91,7 @@ const RecommendationCarouselComponent = ({ products }) => {
                   title={product.productName}
                   price={product.productPrice}
                   id={product._id}
+                  onClick={() => handleDetail(product)}
                 />
               </div>
             ))}

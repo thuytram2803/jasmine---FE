@@ -84,6 +84,7 @@ const PaymentResult = () => {
         case "1": return "Giao dịch thành công";
         case "2": return "Giao dịch thất bại";
         case "3": return "Đang xử lý";
+        case "-49": return "Giao dịch thất bại do khách hàng hủy giao dịch";
         default: return "Không xác định";
       }
     }
@@ -180,7 +181,7 @@ const PaymentResult = () => {
 
   // Handle VNPay and ZaloPay payment results
   const isSuccess = paymentMethod === "ZALOPAY"
-    ? result?.data?.status === "1"  // ZaloPay: 1 = SUCCESS, 2 = FAIL, 3 = PROCESSING
+    ? result?.data?.status === "1"  // ZaloPay: 1 = SUCCESS, 2 = FAIL, 3 = PROCESSING, -49 = CANCELED
     : result?.code === "00";        // VNPay: 00 = SUCCESS
 
   return (
@@ -212,7 +213,8 @@ const PaymentResult = () => {
                   <p><strong>Trạng thái ZaloPay:</strong> {
                     result.data.status === "1" ? "Thành công" :
                     result.data.status === "2" ? "Thất bại" :
-                    result.data.status === "3" ? "Đang xử lý" : "Không xác định"
+                    result.data.status === "3" ? "Đang xử lý" :
+                    result.data.status === "-49" ? "Đã hủy giao dịch" : "Không xác định"
                   }</p>
                 </>
               )}

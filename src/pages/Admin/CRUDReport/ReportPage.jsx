@@ -173,12 +173,12 @@ const ReportPage = () => {
     if (code.startsWith('ORD-')) {
       const parts = code.split('-');
       if (parts.length > 1) {
-        return `ORD-${parts[1].substring(0, 4)}`;
+        return `ORD-${parts[1].substring(0, 8)}`;
       }
     }
 
     // If it's another format, take first 4 characters
-    return `ORD-${code.substring(0, 4)}`;
+    return `ORD-${code.substring(0, 8)}`;
   };
 
   const days = Array.from({ length: 31 }, (_, i) => ({

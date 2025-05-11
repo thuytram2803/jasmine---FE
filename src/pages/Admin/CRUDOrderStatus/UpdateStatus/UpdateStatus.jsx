@@ -166,11 +166,11 @@ const UpdateStatus = () => {
 
     // Nếu mã đơn đã có định dạng ORD-XXXX
     if (code.startsWith('ORD-')) {
-      return `${code.substring(0, 8)}`;
+      return `${code.substring(0, 12)}`;
     }
 
     // Nếu không, thêm tiền tố ORD- và lấy 4 ký tự đầu tiên
-    return `ORD-${code.substring(0, 4)}`;
+    return `ORD-${code.substring(0, 8)}`;
   };
 
   return (

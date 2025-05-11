@@ -10,7 +10,7 @@ const OrderHistoryCardComponent = ({ order }) => {
 
   const handleViewDetails = (id) => {
     console.log("ORDERID", id)
-    
+
     console.log("ITEM", order)
     navigate(`/order-detail-history/${id}`, { state: { order} }); // Chuyển hướng với dữ liệu
   };
@@ -25,7 +25,7 @@ const OrderHistoryCardComponent = ({ order }) => {
     <div className="order-card">
       <div className="order-title d-flex align-items-center">
         <StatusComponent
-          status={order.status.statusName}
+          status={order?.status?.statusName || "Không xác định"}
         />
       </div>
       <div className="order-products">

@@ -118,7 +118,7 @@ const UpdateStatus = () => {
 
       // Tìm trạng thái hủy (CANCEL)
       const cancelStatus = statuses.find(
-        (status) => status.statusCode === "CANCEL"
+        (status) => status.statusCode === "Cancle"
       );
       if (!cancelStatus) {
         alert("Không tìm thấy trạng thái hủy.");

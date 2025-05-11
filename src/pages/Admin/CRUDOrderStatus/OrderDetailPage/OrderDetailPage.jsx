@@ -104,7 +104,7 @@ const OrderDetailPage = () => {
       const response = await StatusService.getAllStatus(accessToken);
       const allStatuses = response.data;
 
-      const cancelStatus = allStatuses.find((s) => s.statusCode === "CANCEL");
+      const cancelStatus = allStatuses.find((s) => s.statusCode === "Cancle");
       if (!cancelStatus) {
         alert("Không tìm thấy trạng thái hủy.");
         return;

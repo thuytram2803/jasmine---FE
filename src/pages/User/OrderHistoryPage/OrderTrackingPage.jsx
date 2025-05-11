@@ -83,11 +83,11 @@ const OrderTrackingPage = () => {
     if (!statusName) return "secondary";
 
     const statusMap = {
-      "PENDING": "warning",
-      "PROCESSING": "info",
-      "SHIPPED": "primary",
-      "DELIVERED": "success",
-      "CANCELLED": "danger"
+      "OrderedSuccessfully": "warning",
+      "Waiting": "info",
+      "Shipping": "primary",
+      "Received": "success",
+      "Cancle": "danger"
     };
 
     // Default case - convert status name to status code format

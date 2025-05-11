@@ -2,7 +2,7 @@ import React from "react";
 import "./StatusComponent.css";
 
 const StatusComponent = ({ status }) => {
-  const isDelivered = status.trim() === "Đơn hàng đã được giao"; // Kiểm tra trạng thái
+  const isDelivered = status?.trim() === "Đã giao hàng"; // Add optional chaining
 
   return (
     <div className={`status-container ${isDelivered ? "status-delivered" : ""}`}>
@@ -19,7 +19,7 @@ const StatusComponent = ({ status }) => {
         />
       </svg>
       <label className={`status-name ${isDelivered ? "status-name-delivered" : ""}`}>
-        {status}
+        {status || "Không xác định"}
       </label>
     </div>
   );

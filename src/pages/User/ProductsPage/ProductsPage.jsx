@@ -273,6 +273,7 @@ const ProductsPage = () => {
 
     if (selectedProduct) {
       const {
+        _id,
         productName,
         productSize,
         productImage,
@@ -282,7 +283,7 @@ const ProductsPage = () => {
       } = selectedProduct;
       navigate("/view-product-detail", {
         state: {
-          productId,
+          productId: _id,
           productName,
           productSize,
           productImage,

@@ -45,6 +45,7 @@ import NewsDetailPage from "../pages/User/NewsDetailPage/NewsDetailPage";
 import SearchResultPage from "../pages/SearchResultPage/SearchResultPage";
 import NewsDetailPageAdmin from "../pages/Admin/CRUDNews/NewsDetailPageAdmin/NewsDetailPage";
 import UserTab from "../pages/User/UserTab/UserTab.jsx";
+import ManageReviews from "../pages/Admin/CRUDReviews/ManageReviews";
 
 export const routes = [
   {
@@ -361,6 +362,13 @@ export const routes = [
     isShowHeader: true,
     isShowFooter: true,
     isPrivate: true
+  },
+  {
+    path: "/admin/reviews",
+    page: ManageReviews,
+    isShowHeader: true,
+    isShowFooter: true,
+    isPrivate: true,
   },
   {
     path: "*",

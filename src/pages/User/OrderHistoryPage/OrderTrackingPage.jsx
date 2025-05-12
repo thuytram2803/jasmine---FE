@@ -15,6 +15,7 @@ const OrderTrackingPage = () => {
   const [selectedStatus, setSelectedStatus] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
+  const [loadingStatuses, setLoadingStatuses] = useState(false);
 
   const navigate = useNavigate();
   const user = useSelector((state) => state.user);
@@ -34,6 +35,7 @@ const OrderTrackingPage = () => {
       }
 
       const response = await OrderService.getOrdersByUser(token, userId);
+      console.log("Orders response:", response);
       setOrders(response?.data || []);
       setFilteredOrders(response?.data || []);
     } catch (err) {
@@ -44,30 +46,142 @@ const OrderTrackingPage = () => {
   };
 
   const fetchStatuses = async () => {
+    setLoadingStatuses(true);
     try {
       const token = localStorage.getItem("access_token");
+      if (!token) {
+        throw new Error("Vui lòng đăng nhập để xem trạng thái đơn hàng");
+      }
+
       const response = await StatusService.getAllStatus(token);
+      console.log("Status API response:", response);
+
+      if (response && response.data && Array.isArray(response.data)) {
+        // Extract unique statuses from orders if API doesn't return all statuses
+        const orderStatuses = orders
+          .filter(order => order.status && order.status.statusName && order.status.statusCode)
+          .map(order => ({
+            statusName: order.status.statusName,
+            statusCode: order.status.statusCode
+          }));
+
+        // Remove duplicates
+        const uniqueOrderStatuses = [];
+        const seenStatusCodes = new Set();
+
+        orderStatuses.forEach(status => {
+          if (!seenStatusCodes.has(status.statusCode)) {
+            seenStatusCodes.add(status.statusCode);
+            uniqueOrderStatuses.push(status);
+          }
+        });
+
+        console.log("Unique order statuses:", uniqueOrderStatuses);
+
+        // Combine API statuses and order statuses
+        let allStatuses = [...response.data];
+
+        // Add any order statuses not in the API response
+        uniqueOrderStatuses.forEach(orderStatus => {
+          if (!allStatuses.some(s => s.statusCode === orderStatus.statusCode)) {
+            allStatuses.push(orderStatus);
+          }
+        });
+
+        const statusOptions = [
+          { label: "Tất cả", value: null },
+          ...allStatuses.map((status) => ({
+            label: status.statusName,
+            value: status.statusCode,
+          })),
+        ];
+
+        console.log("Final status options:", statusOptions);
+        setStatuses(statusOptions);
+      } else {
+        console.error("Không có dữ liệu trạng thái hợp lệ:", response);
+
+        // Fallback: Extract statuses from orders
+        const orderStatuses = orders
+          .filter(order => order.status && order.status.statusName && order.status.statusCode)
+          .map(order => ({
+            statusName: order.status.statusName,
+            statusCode: order.status.statusCode
+          }));
+
+        // Remove duplicates
+        const uniqueOrderStatuses = [];
+        const seenStatusCodes = new Set();
+
+        orderStatuses.forEach(status => {
+          if (!seenStatusCodes.has(status.statusCode)) {
+            seenStatusCodes.add(status.statusCode);
+            uniqueOrderStatuses.push(status);
+          }
+        });
+
+        const statusOptions = [
+          { label: "Tất cả", value: null },
+          ...uniqueOrderStatuses.map((status) => ({
+            label: status.statusName,
+            value: status.statusCode,
+          })),
+        ];
+
+        console.log("Fallback status options:", statusOptions);
+        setStatuses(statusOptions);
+      }
+    } catch (error) {
+      console.error("Không thể tải danh sách trạng thái:", error);
+
+      // Fallback: Extract statuses from orders
+      const orderStatuses = orders
+        .filter(order => order.status && order.status.statusName && order.status.statusCode)
+        .map(order => ({
+          statusName: order.status.statusName,
+          statusCode: order.status.statusCode
+        }));
+
+      // Remove duplicates
+      const uniqueOrderStatuses = [];
+      const seenStatusCodes = new Set();
+
+      orderStatuses.forEach(status => {
+        if (!seenStatusCodes.has(status.statusCode)) {
+          seenStatusCodes.add(status.statusCode);
+          uniqueOrderStatuses.push(status);
+        }
+      });
+
       const statusOptions = [
         { label: "Tất cả", value: null },
-        ...response.data.map((status) => ({
+        ...uniqueOrderStatuses.map((status) => ({
           label: status.statusName,
           value: status.statusCode,
         })),
       ];
+
+      console.log("Error fallback status options:", statusOptions);
       setStatuses(statusOptions);
-    } catch (error) {
-      console.error("Không thể tải danh sách trạng thái", error.message);
+    } finally {
+      setLoadingStatuses(false);
     }
   };
 
   useEffect(() => {
     if (user && user.id) {
-      fetchStatuses();
       fetchOrders();
     }
   }, [user]);
 
+  useEffect(() => {
+    if (orders.length > 0) {
+      fetchStatuses();
+    }
+  }, [orders]);
+
   const handleFilter = (statusCode) => {
+    console.log("Filtering by status:", statusCode);
     setSelectedStatus(statusCode);
     if (!statusCode) {
       setFilteredOrders(orders); // Hiển thị tất cả đơn hàng
@@ -85,14 +199,20 @@ const OrderTrackingPage = () => {
     const statusMap = {
       "OrderedSuccessfully": "warning",
       "Waiting": "info",
-      "Shipping": "primary",
+      "TookOrder": "primary",
+      "Shipping": "success",
       "Received": "success",
       "Cancle": "danger"
     };
 
-    // Default case - convert status name to status code format
-    const statusKey = statusName.toUpperCase();
-    return statusMap[statusKey] || "secondary";
+    // Try to match the status name directly
+    for (const [key, value] of Object.entries(statusMap)) {
+      if (statusName.includes(key)) {
+        return value;
+      }
+    }
+
+    return "secondary"; // Default color
   };
 
   // Format date to dd/mm/yyyy
@@ -109,25 +229,6 @@ const OrderTrackingPage = () => {
       style: 'currency',
       currency: 'VND'
     }).format(amount);
-  };
-
-  // Format order code to show only ORD and 4 characters
-  const formatOrderCode = (code) => {
-    if (!code) return "";
-
-    // If the format is already ORD-XXXX, just return it
-    if (code.startsWith('ORD-') && code.length <= 8) return code;
-
-    // Extract just the first 4 characters after ORD- prefix
-    if (code.startsWith('ORD-')) {
-      const parts = code.split('-');
-      if (parts.length > 1) {
-        return `ORD-${parts[1].substring(0, 4)}`;
-      }
-    }
-
-    // If it's another format, take first 4 characters
-    return `ORD-${code.substring(0, 4)}`;
   };
 
   return (
@@ -148,7 +249,7 @@ const OrderTrackingPage = () => {
                   <DropdownButton
                     className="filter-order__status"
                     title={
-                      <span>
+                      <span className="dropdown-title-text">
                         <i className="fas fa-filter me-2"></i>
                         {selectedStatus
                           ? statuses.find((s) => s.value === selectedStatus)?.label ||
@@ -157,12 +258,20 @@ const OrderTrackingPage = () => {
                       </span>
                     }
                     onSelect={handleFilter}
+                    disabled={loadingStatuses}
+                    align="end"
                   >
-                    {statuses.map((status, index) => (
-                      <Dropdown.Item key={index} eventKey={status.value}>
-                        {status.label}
-                      </Dropdown.Item>
-                    ))}
+                    {loadingStatuses ? (
+                      <Dropdown.Item disabled>Đang tải...</Dropdown.Item>
+                    ) : statuses.length > 1 ? (
+                      statuses.map((status, index) => (
+                        <Dropdown.Item key={index} eventKey={status.value}>
+                          {status.label}
+                        </Dropdown.Item>
+                      ))
+                    ) : (
+                      <Dropdown.Item disabled>Không có trạng thái</Dropdown.Item>
+                    )}
                   </DropdownButton>
                 </div>
               </div>
@@ -197,39 +306,36 @@ const OrderTrackingPage = () => {
 
             {/* Table */}
             {!loading && filteredOrders.length > 0 && (
-              <div className="table-container">
-                <table className="order-table">
+              <div className="table-responsive">
+                <table className="table table-bordered">
                   <thead>
                     <tr>
-                      <th>STT</th>
-                      <th>Mã đơn</th>
-                      <th>Trạng thái</th>
-                      <th>Ngày đặt</th>
-                      <th>Ngày giao dự kiến</th>
-                      <th>Tổng tiền</th>
-                      <th>Thao tác</th>
+                      <th style={{width: "5%"}}>STT</th>
+                      <th style={{width: "25%"}}>Mã đơn</th>
+                      <th style={{width: "15%"}}>Trạng thái</th>
+                      <th style={{width: "15%"}}>Ngày đặt</th>
+                      <th style={{width: "15%"}}>Ngày giao dự kiến</th>
+                      <th style={{width: "15%"}}>Tổng tiền</th>
+                      <th style={{width: "10%"}}>Thao tác</th>
                     </tr>
                   </thead>
                   <tbody>
                     {filteredOrders.map((order, index) => (
-                      <tr
-                        key={order._id}
-                        className="order-row"
-                      >
-                        <td>{index + 1}</td>
-                        <td className="order-code">{formatOrderCode(order.orderCode)}</td>
-                        <td>
+                      <tr key={order._id}>
+                        <td className="text-center">{index + 1}</td>
+                        <td>{order.orderCode}</td>
+                        <td className="text-center">
                           <Badge
-                            bg={getStatusBadgeClass(order.status?.statusName)}
+                            bg={getStatusBadgeClass(order.status?.statusName || "")}
                             className="status-badge"
                           >
                             {order.status?.statusName || "Không xác định"}
                           </Badge>
                         </td>
-                        <td>{formatDate(order.createdAt)}</td>
-                        <td>{formatDate(order.deliveryDate)}</td>
-                        <td className="price-column">{formatCurrency(order.totalPrice)}</td>
-                        <td>
+                        <td className="text-center">{formatDate(order.createdAt)}</td>
+                        <td className="text-center">{formatDate(order.deliveryDate)}</td>
+                        <td className="text-end">{formatCurrency(order.totalPrice)}</td>
+                        <td className="text-center">
                           <ButtonComponent
                             className="btn-detail"
                             onClick={() => handleDetail(order)}

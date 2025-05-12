@@ -8,7 +8,11 @@ import SizeComponent from "../../../../components/SizeComponent/SizeComponent";
 import { useNavigate } from "react-router-dom";
 import * as productService from "../../../../services/productServices";
 import { useMutationHook } from "../../../../hooks/useMutationHook";
-
+import StarRating from "../../../../components/StarRating/StarRating";
+import { getReviewsByProduct, toggleReviewVisibility, deleteReview } from "../../../../services/ReviewService";
+import { formatDistanceToNow } from "date-fns";
+import { vi } from "date-fns/locale";
+import { FaEye, FaEyeSlash, FaTimes, FaTrashAlt } from "react-icons/fa";
 
 const UpdateProductPage = () => {
   const navigate = useNavigate();
@@ -24,7 +28,34 @@ const UpdateProductPage = () => {
       productDescription: "",
     }
   );
+
+  // State for product reviews
+  const [reviews, setReviews] = useState([]);
+  const [loadingReviews, setLoadingReviews] = useState(false);
+  const [reviewError, setReviewError] = useState("");
+
   const [categories, setCategories] = useState([]); // State lưu danh sách category
+
+  // Add state for expanded description
+  const [isDescriptionExpanded, setIsDescriptionExpanded] = useState(false);
+
+  // Toggle description expansion
+  const toggleDescriptionExpand = () => {
+    setIsDescriptionExpanded(!isDescriptionExpanded);
+  };
+
+  // Add state for review details modal
+  const [selectedReview, setSelectedReview] = useState(null);
+
+  // Function to open review details modal
+  const openReviewDetails = (review) => {
+    setSelectedReview(review);
+  };
+
+  // Function to close review details modal
+  const closeReviewDetails = () => {
+    setSelectedReview(null);
+  };
 
   useEffect(() => {
     const fetchCategories = async () => {
@@ -57,6 +88,30 @@ const UpdateProductPage = () => {
     };
     fetchCategories();
   }, []);
+
+  // Fetch product reviews when product ID is available
+  useEffect(() => {
+    const fetchReviews = async () => {
+      if (product && product.productId) {
+        setLoadingReviews(true);
+        try {
+          const response = await getReviewsByProduct(product.productId);
+          if (response.status === "OK") {
+            setReviews(response.data);
+          } else {
+            setReviewError("Không thể tải đánh giá sản phẩm");
+          }
+        } catch (error) {
+          console.error("Error fetching reviews:", error);
+          setReviewError("Đã xảy ra lỗi khi tải đánh giá");
+        } finally {
+          setLoadingReviews(false);
+        }
+      }
+    };
+
+    fetchReviews();
+  }, [product.productId]);
 
   const [imagePreview, setImagePreview] = useState(
     product.productImage || null
@@ -126,10 +181,56 @@ const UpdateProductPage = () => {
     const response = mutation.mutate(data)
   };
 
+  // Handle toggling review visibility
+  const handleToggleVisibility = async (reviewId) => {
+    try {
+      const response = await toggleReviewVisibility(reviewId);
 
+      if (response.status === "OK") {
+        // Update the review in the list
+        setReviews(prevReviews =>
+          prevReviews.map(review =>
+            review._id === reviewId
+              ? { ...review, isVisible: !review.isVisible }
+              : review
+          )
+        );
+      }
+    } catch (error) {
+      console.error("Error toggling review visibility:", error);
+    }
+  };
+
+  // Handle deleting a review
+  const handleDeleteReview = async (reviewId) => {
+    try {
+      if (window.confirm("Bạn có chắc chắn muốn xóa đánh giá này không?")) {
+        const response = await deleteReview(reviewId);
+
+        if (response.status === "OK") {
+          // Remove the review from the list
+          setReviews(prevReviews =>
+            prevReviews.filter(review => review._id !== reviewId)
+          );
+        }
+      }
+    } catch (error) {
+      console.error("Error deleting review:", error);
+    }
+  };
+
+  // Format the review date
+  const formatReviewDate = (dateString) => {
+    try {
+      const date = new Date(dateString);
+      return formatDistanceToNow(date, { addSuffix: true, locale: vi });
+    } catch (error) {
+      console.error("Error formatting date:", error);
+      return "N/A";
+    }
+  };
 
   //Xoa
-
   const handleDelete = async (productId) => {
     const confirmDelete = window.confirm("Are you sure you want to delete this product?");
 
@@ -149,7 +250,6 @@ const UpdateProductPage = () => {
       }
     }
   };
-
 
   return (
     <div>
@@ -186,8 +286,8 @@ const UpdateProductPage = () => {
                 <div className="icon__update-image" onClick={handleEditImage}>
                   <svg
                     xmlns="http://www.w3.org/2000/svg"
-                    width="30"
-                    height="30"
+                    width="20"
+                    height="20"
                     viewBox="0 0 30 30"
                     fill="none"
                   >
@@ -202,83 +302,103 @@ const UpdateProductPage = () => {
 
             {/* info right */}
             <div className="info__right">
-              <div className="col product-name">
+              <div className="product-name">
                 <label className="label-name">Tên sản phẩm</label>
-                <FormComponent
-                  name="productName"
-                  value={product.productName}
-                  onChange={handleInputChange}
-                ></FormComponent>
+                <div className="form-field-container">
+                  <FormComponent
+                    name="productName"
+                    value={product.productName}
+                    onChange={handleInputChange}
+                  ></FormComponent>
+                </div>
               </div>
 
               <div className="product-price">
                 <label className="label-price">Giá sản phẩm</label>
-                <FormComponent
-                  name="productPrice"
-                  value={product.productPrice}
-                  onChange={handleInputChange}
-                ></FormComponent>
+                <div className="form-field-container">
+                  <FormComponent
+                    name="productPrice"
+                    value={product.productPrice}
+                    onChange={handleInputChange}
+                  ></FormComponent>
+                </div>
               </div>
 
               <div className="product-category">
                 <label className="label-category">Loại sản phẩm</label>
-                <select
-                  name="productCategory"
-                  value={product.productCategory}
-                  onChange={handleInputChange}
-                  className="choose-property"
-                  style={{ width: "36rem", height: "6rem", border: "none", color: "grey", borderRadius: "50px", boxShadow: "0px 2px 4px 0px #203c1640", padding: "15px" }}
-                  placeholder="Chọn loại sản phẩm"
-                >
-                  <option value="" disabled>Chọn loại sản phẩm</option>
-                  {Array.isArray(categories) && categories.length > 0 ? (
-                    categories.map((category) => (
-                      <option key={category._id} value={category._id}>
-                        {category.categoryName}
-                      </option>
-                    ))
-                  ) : (
-                    <option disabled>Không có loại sản phẩm</option>
-                  )}
-                </select>
+                <div className="form-field-container">
+                  <select
+                    name="productCategory"
+                    value={product.productCategory}
+                    onChange={handleInputChange}
+                    className="choose-property"
+                    placeholder="Chọn loại sản phẩm"
+                  >
+                    <option value="" disabled>Chọn loại sản phẩm</option>
+                    {Array.isArray(categories) && categories.length > 0 ? (
+                      categories.map((category) => (
+                        <option key={category._id} value={category._id}>
+                          {category.categoryName}
+                        </option>
+                      ))
+                    ) : (
+                      <option disabled>Không có loại sản phẩm</option>
+                    )}
+                  </select>
+                </div>
               </div>
 
               <div className="product-size">
                 <label className="label-size">Kích thước sản phẩm</label>
-                <div className="item__size">
-                  <SizeComponent
-                    name="productSize"
-                    value={product.productSize}
-                    isSelected={product.productSize}
-                    onChange={handleInputChange}
-                  >
-                    {product.productSize}
-                  </SizeComponent>
+                <div className="form-field-container">
+                  <div className="item__size">
+                    <SizeComponent
+                      name="productSize"
+                      value={product.productSize}
+                      isSelected={product.productSize}
+                      onChange={handleInputChange}
+                    >
+                      {product.productSize}
+                    </SizeComponent>
 
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    width="30"
-                    height="30"
-                    viewBox="0 0 30 30"
-                    fill="none"
-                  >
-                    <path
-                      fill-rule="evenodd"
-                      clip-rule="evenodd"
-                      d="M26.25 15C26.25 21.2132 21.2132 26.25 15 26.25C8.7868 26.25 3.75 21.2132 3.75 15C3.75 8.7868 8.7868 3.75 15 3.75C21.2132 3.75 26.25 8.7868 26.25 15ZM15 22.25C14.4477 22.25 14 21.8023 14 21.25V16H8.75C8.19772 16 7.75 15.5523 7.75 15C7.75 14.4477 8.19772 14 8.75 14H14V8.75C14 8.19772 14.4477 7.75 15 7.75C15.5523 7.75 16 8.19772 16 8.75V14H21.25C21.8023 14 22.25 14.4477 22.25 15C22.25 15.5523 21.8023 16 21.25 16H16V21.25C16 21.8023 15.5523 22.25 15 22.25Z"
-                      fill="#3A060E"
-                    />
-                  </svg>
+                    <div className="size-add-tooltip">
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        width="30"
+                        height="30"
+                        viewBox="0 0 30 30"
+                        fill="none"
+                      >
+                        <path
+                          fill-rule="evenodd"
+                          clip-rule="evenodd"
+                          d="M26.25 15C26.25 21.2132 21.2132 26.25 15 26.25C8.7868 26.25 3.75 21.2132 3.75 15C3.75 8.7868 8.7868 3.75 15 3.75C21.2132 3.75 26.25 8.7868 26.25 15ZM15 22.25C14.4477 22.25 14 21.8023 14 21.25V16H8.75C8.19772 16 7.75 15.5523 7.75 15C7.75 14.4477 8.19772 14 8.75 14H14V8.75C14 8.19772 14.4477 7.75 15 7.75C15.5523 7.75 16 8.19772 16 8.75V14H21.25C21.8023 14 22.25 14.4477 22.25 15C22.25 15.5523 21.8023 16 21.25 16H16V21.25C16 21.8023 15.5523 22.25 15 22.25Z"
+                          fill="#3A060E"
+                        />
+                      </svg>
+                    </div>
+                  </div>
                 </div>
               </div>
             </div>
           </div>
           {/* info bot */}
           <div className="info__bot">
-            <label className="label-description">Mô Tả</label>
+            <div className="description-header">
+              <label className="label-description">Mô Tả</label>
+              <button
+                className="expand-button"
+                onClick={toggleDescriptionExpand}
+                title={isDescriptionExpanded ? "Thu gọn" : "Xem thêm"}
+                type="button"
+              >
+                {isDescriptionExpanded ? <FaEyeSlash /> : <FaEye />}
+                <span>{isDescriptionExpanded ? "Thu gọn" : "Xem thêm"}</span>
+              </button>
+            </div>
             <textarea
               name="productDescription"
-              className="product-description"
+              className={`product-description ${isDescriptionExpanded ? 'expanded' : ''}`}
               value={product.productDescription}
               onChange={(e) =>
                 setProduct({ ...product, productDescription: e.target.value })
@@ -294,7 +414,166 @@ const UpdateProductPage = () => {
           <ButtonComponent onClick={() => handleDelete(product.productId)}>Xóa</ButtonComponent>
           <ButtonComponent onClick={() => navigate("/admin/products")}>Thoát</ButtonComponent>
         </div>
+
+        {/* Product Reviews Management Section */}
+        <div className="product-reviews-admin">
+          <h2 className="reviews-admin-title">Quản lý đánh giá sản phẩm</h2>
+
+          {loadingReviews ? (
+            <div className="reviews-loading">
+              <i className="fas fa-spinner fa-spin"></i>
+              <p>Đang tải đánh giá...</p>
+            </div>
+          ) : reviewError ? (
+            <div className="reviews-error">
+              <i className="fas fa-exclamation-circle"></i>
+              <p>{reviewError}</p>
+            </div>
+          ) : reviews.length === 0 ? (
+            <div className="no-reviews">
+              <i className="fas fa-comment-slash"></i>
+              <p>Sản phẩm chưa có đánh giá nào</p>
+            </div>
+          ) : (
+            <div className="reviews-table-container">
+              <table className="reviews-table">
+                <thead>
+                  <tr>
+                    <th>Người dùng</th>
+                    <th>Đánh giá</th>
+                    <th>Nội dung</th>
+                    <th>Thời gian</th>
+                    <th>Trạng thái</th>
+                    <th>Hành động</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {reviews.map(review => (
+                    <tr
+                      key={review._id}
+                      className={review.isVisible ? "" : "hidden-review-row"}
+                    >
+                      <td className="username-cell">{review.username || "Anonymous User"}</td>
+                      <td className="rating-cell">
+                        <StarRating rating={review.rating} readOnly={true} size="small" />
+                      </td>
+                      <td className="comment-cell">
+                        <div className="comment-content">
+                          {review.comment}
+                        </div>
+                      </td>
+                      <td className="date-cell">{formatReviewDate(review.createdAt)}</td>
+                      <td className="status-cell">
+                        <span className={`status-badge ${review.isVisible ? "visible" : "hidden"}`}>
+                          {review.isVisible ? "Hiển thị" : "Đã ẩn"}
+                        </span>
+                      </td>
+                      <td className="actions-cell">
+                        <div className="review-actions">
+                          <button
+                            className={`visibility-btn ${review.isVisible ? "hide-btn" : "show-btn"}`}
+                            onClick={() => handleToggleVisibility(review._id)}
+                            title={review.isVisible ? "Ẩn đánh giá" : "Hiện đánh giá"}
+                          >
+                            {review.isVisible ? (
+                              <i className="fas fa-eye-slash"></i>
+                            ) : (
+                              <i className="fas fa-eye"></i>
+                            )}
+                          </button>
+                          <button
+                            className="delete-btn"
+                            onClick={() => handleDeleteReview(review._id)}
+                            title="Xóa đánh giá"
+                          >
+                            <i className="fas fa-trash"></i>
+                          </button>
+                          <button
+                            className="view-details-btn-icon"
+                            onClick={() => openReviewDetails(review)}
+                            title="Xem chi tiết"
+                          >
+                            <i className="fas fa-search-plus"></i>
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
+        </div>
       </div>
+
+      {/* Review Details Modal */}
+      {selectedReview && (
+        <div className="review-details-modal">
+          <div className="review-details-content">
+            <div className="review-details-header">
+              <h3>Chi tiết đánh giá</h3>
+              <button className="close-modal-btn" onClick={closeReviewDetails}>
+                <FaTimes />
+              </button>
+            </div>
+            <div className="review-details-body">
+              <div className="review-detail-row">
+                <span className="review-detail-label">Người dùng:</span>
+                <span className="review-detail-value">
+                  {selectedReview.username || "Anonymous User"}
+                </span>
+              </div>
+              <div className="review-detail-row">
+                <span className="review-detail-label">Đánh giá:</span>
+                <span className="review-detail-value">
+                  <StarRating
+                    rating={selectedReview.rating}
+                    readOnly={true}
+                    size="small"
+                  />
+                </span>
+              </div>
+              <div className="review-detail-row">
+                <span className="review-detail-label">Thời gian:</span>
+                <span className="review-detail-value">
+                  {formatReviewDate(selectedReview.createdAt)}
+                </span>
+              </div>
+              <div className="review-comment-full">
+                <span className="review-detail-label">Nội dung:</span>
+                <div className="review-comment-text">
+                  {selectedReview.comment}
+                </div>
+              </div>
+            </div>
+            <div className="review-details-footer">
+              <div className="review-details-actions">
+                <button
+                  className={`visibility-btn ${selectedReview.isVisible ? "hide-btn" : "show-btn"}`}
+                  onClick={() => {
+                    handleToggleVisibility(selectedReview._id);
+                    closeReviewDetails();
+                  }}
+                >
+                  {selectedReview.isVisible ?
+                    <><FaEyeSlash /> Ẩn đánh giá</> :
+                    <><FaEye /> Hiện đánh giá</>
+                  }
+                </button>
+                <button
+                  className="delete-btn-full"
+                  onClick={() => {
+                    handleDeleteReview(selectedReview._id);
+                    closeReviewDetails();
+                  }}
+                >
+                  <FaTrashAlt /> Xóa đánh giá
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

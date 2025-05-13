@@ -301,8 +301,14 @@ img:hover {
   .navbar {
     padding: 10px 0;
   }
-  
+
   .nav__content {
     gap: 10px;
   }
+}
+
+/* Hide news menu items */
+a[href="/news"],
+a[href="/admin/news"] {
+  display: none !important;
 }

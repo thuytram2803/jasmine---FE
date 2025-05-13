@@ -1,3 +1,8 @@
+import BlogPageAdmin from "../pages/Admin/CRUDBlog/BlogPage/BlogPageAdmin";
+import AddEditBlog from "../pages/Admin/CRUDBlog/AddEditBlog/AddEditBlog";
+import BlogDetailAdmin from "../pages/Admin/CRUDBlog/BlogDetailPage/BlogDetailAdmin";
+import BlogPage from "../pages/User/BlogPage/BlogPage";
+import BlogDetailPage from "../pages/User/BlogDetailPage/BlogDetailPage";
 import ReportPage from "../pages/Admin/CRUDReport/ReportPage";
 import DetailCategoryPage from "../pages/Admin/CRUDCategory/DetailCategoryPage/DetailCategoryPage";
 import UpdateCategoryPage from "../pages/Admin/CRUDCategory/UpdateCategoryPage/UpdateCategoryPage";
@@ -158,6 +163,51 @@ export const routes = [
     isShowFooter: true,
   },
 
+  {
+    path: "/blogs",
+    page: BlogPage,
+    isShowHeader: true,
+    isShowFooter: true,
+  },
+
+  {
+    path: "/blog-detail/:id",
+    page: BlogDetailPage,
+    isShowHeader: true,
+    isShowFooter: true,
+  },
+
+  {
+    path: "/admin/blogs",
+    page: BlogPageAdmin,
+    isShowHeader: true,
+    isShowFooter: true,
+    isPrivate: true,
+  },
+
+  {
+    path: "/admin/blog/add-blog",
+    page: AddEditBlog,
+    isShowHeader: true,
+    isShowFooter: true,
+    isPrivate: true,
+  },
+
+  {
+    path: "/admin/blog/edit-blog/:id",
+    page: AddEditBlog,
+    isShowHeader: true,
+    isShowFooter: true,
+    isPrivate: true,
+  },
+
+  {
+    path: "/admin/blog-detail/:id",
+    page: BlogDetailAdmin,
+    isShowHeader: true,
+    isShowFooter: true,
+    isPrivate: true,
+  },
 
   {
     path: "/admin/add-product",

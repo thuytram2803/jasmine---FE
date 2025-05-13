@@ -74,17 +74,17 @@ const HeaderComponent = () => {
     }
     navigate(`/search?search=${encodeURIComponent(query.trim())}`);
   };
-  
+
   // Handle search input change
   const handleSearchChange = (e) => {
     setSearchQuery(e.target.value);
   };
-  
+
   // Handle search submission
   const handleSearchSubmit = () => {
     handleSearch(searchQuery);
   };
-  
+
   // Handle enter key press in search box
   const handleKeyDown = (e) => {
     if (e.key === "Enter") {
@@ -152,8 +152,8 @@ const HeaderComponent = () => {
                     onChange={handleSearchChange}
                     onKeyDown={handleKeyDown}
                   />
-                  <VoiceComponent 
-                    onVoiceInput={handleVoiceInput} 
+                  <VoiceComponent
+                    onVoiceInput={handleVoiceInput}
                     className="voice-component"
                   />
                   <button className={styles.search_button} onClick={handleSearchSubmit}>
@@ -229,8 +229,11 @@ const HeaderComponent = () => {
                     <ButtonNoBGComponent to="/admin/products">
                       Sản phẩm
                     </ButtonNoBGComponent>
-                    <ButtonNoBGComponent to="/admin/news">
+                    <ButtonNoBGComponent to="/admin/news" style={{ display: 'none' }}>
                       Tin tức
+                    </ButtonNoBGComponent>
+                    <ButtonNoBGComponent to="/admin/blogs">
+                      Blog
                     </ButtonNoBGComponent>
                     <ButtonNoBGComponent to="/introduce">
                       Giới thiệu
@@ -249,8 +252,11 @@ const HeaderComponent = () => {
                     <ButtonNoBGComponent to="/products">
                       Sản phẩm
                     </ButtonNoBGComponent>
-                    <ButtonNoBGComponent to="/news">
+                    <ButtonNoBGComponent to="/news" style={{ display: 'none' }}>
                       Tin tức
+                    </ButtonNoBGComponent>
+                    <ButtonNoBGComponent to="/blogs">
+                      Blog
                     </ButtonNoBGComponent>
                     <ButtonNoBGComponent to="/introduce">
                       Giới thiệu

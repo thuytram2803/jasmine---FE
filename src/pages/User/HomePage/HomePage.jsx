@@ -824,7 +824,7 @@ const HomePage = () => {
 
           <div style={{ textAlign: "center", marginTop: "50px" }}>
             <button
-              onClick={() => handleClick("/news")}
+              onClick={() => handleClick("/blogs")}
               style={{
                 background: "transparent",
                 color: "#334e68",

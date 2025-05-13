@@ -152,7 +152,17 @@ const CartPage = () => {
                   />
                 </td>
                 <td className="PriceProduct">
-                  <p className="Price">{product.price}</p>
+                  <p className="Price">
+                    {product.originalPrice && product.originalPrice !== product.price ? (
+                      <>
+                        <span className="original-price">{product.originalPrice} VND</span>
+                        <br />
+                        <span className="discounted-price">{product.price} VND</span>
+                      </>
+                    ) : (
+                      `${product.price} VND`
+                    )}
+                  </p>
                 </td>
                 <td className="QuantityBtn">
                   <QuantityBtn

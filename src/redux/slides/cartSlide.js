@@ -41,6 +41,7 @@ const cartSlice = createSlice({
           img: action.payload.img,
           title: action.payload.title,
           price: action.payload.price,
+          originalPrice: action.payload.originalPrice, // Lưu giá gốc nếu có
           quantity: action.payload.quantity || 1,
         });
       }

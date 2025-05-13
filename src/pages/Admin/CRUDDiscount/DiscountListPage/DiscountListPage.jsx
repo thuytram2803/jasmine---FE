@@ -68,7 +68,7 @@ const DiscountListPage = () => {
   }, []);
 
   const getCategoryNameById = (id) => {
-    const category = categories.find((cat) => cat.id === id);
+    const category = categories.find((cat) => cat._id === id);
     return category ? category.categoryName : "Không xác định";
   };
 
@@ -276,8 +276,8 @@ const DiscountListPage = () => {
                                 </td>
                                 <td className="discount-value">{formatCurrency(promo.discountValue)}</td>
                                 <td>
-                                  <span className="category-badge" title={getCategoryNameById(promo.aplicableCategory)}>
-                                    {truncateText(getCategoryNameById(promo.aplicableCategory), 15)}
+                                  <span className="category-badge" title={getCategoryNameById(promo.applicableCategory)}>
+                                    {truncateText(getCategoryNameById(promo.applicableCategory), 15)}
                                   </span>
                                 </td>
                                 <td>{formatDate(promo.discountStartDate)}</td>

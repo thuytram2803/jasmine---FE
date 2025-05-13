@@ -205,7 +205,10 @@ const ViewProductDetailPage = () => {
 
   // Hàm thêm sản phẩm vào giỏ hàng
   const handleAddToCart = () => {
-    const { productName, productPrice, productImage, productId } = product;
+    const { productName, productPrice, discountedPrice, productImage, productId } = product;
+
+    // Sử dụng giá sau khuyến mãi nếu có
+    const priceToUse = discountedPrice !== undefined ? discountedPrice : productPrice;
 
     // Dispatch action để thêm vào giỏ hàng
     dispatch(
@@ -213,7 +216,8 @@ const ViewProductDetailPage = () => {
         id: productId,
         img: productImage,
         title: productName,
-        price: productPrice,
+        price: priceToUse,
+        originalPrice: productPrice,
         quantity: quantity
       })
     );
@@ -284,7 +288,14 @@ const ViewProductDetailPage = () => {
             </div>
 
             <div className="product-detail-price">
-              {`${product.productPrice?.toLocaleString("en-US") || 0} VND`}
+              {product.discountedPrice !== undefined ? (
+                <>
+                  <span className="original-price">{`${product.productPrice?.toLocaleString("en-US") || 0} VND`}</span>
+                  <span className="discounted-price">{`${product.discountedPrice?.toLocaleString("en-US") || 0} VND`}</span>
+                </>
+              ) : (
+                `${product.productPrice?.toLocaleString("en-US") || 0} VND`
+              )}
             </div>
 
             <div className="product-detail-category">

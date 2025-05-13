@@ -6,6 +6,7 @@ import ButtonComponent from "../../../components/ButtonComponent/ButtonComponent
 import { useNavigate, useLocation } from "react-router-dom";
 import { getAllproduct, getProductsByCategory } from "../../../services/productServices";
 import { getAllCategory } from "../../../services/CategoryService";
+import { getAllDiscount, getDiscountsByCategory } from "../../../services/DiscountService";
 
 const ProductsPage = () => {
   const [products, setProducts] = useState([]); // State lưu danh sách sản phẩm
@@ -20,6 +21,7 @@ const ProductsPage = () => {
   const [productsCount, setProductsCount] = useState(0); // Số lượng sản phẩm
   const [sortOption, setSortOption] = useState("default"); // Lựa chọn sắp xếp
   const [priceFilter, setPriceFilter] = useState(null); // State lưu bộ lọc giá
+  const [discounts, setDiscounts] = useState([]); // State lưu danh sách khuyến mãi
   const ITEMS_PER_PAGE = 9; // Số sản phẩm trên mỗi trang
 
   const navigate = useNavigate();
@@ -40,6 +42,89 @@ const ProductsPage = () => {
     fetchCategories();
   }, []);
 
+  // Lấy danh sách khuyến mãi
+  useEffect(() => {
+    const fetchDiscounts = async () => {
+      try {
+        const data = await getAllDiscount();
+        if (Array.isArray(data.data)) {
+          // Lọc chỉ lấy các khuyến mãi đang hoạt động
+          const activeDiscounts = data.data.filter(discount => {
+            const now = new Date();
+            const startDate = new Date(discount.discountStartDate);
+            const endDate = new Date(discount.discountEndDate);
+            return now >= startDate && now <= endDate;
+          });
+          setDiscounts(activeDiscounts);
+        }
+      } catch (error) {
+        console.error("Error fetching discounts:", error);
+      }
+    };
+    fetchDiscounts();
+  }, []);
+
+  // Tính giá sau khi áp dụng khuyến mãi
+  const calculateDiscountedPrice = (product) => {
+    if (!discounts || discounts.length === 0) return undefined;
+
+    // Debug: Log thông tin sản phẩm và loại sản phẩm
+    console.log(`Product: ${product.productName}, Category ID: ${product.productCategory}`);
+
+    // Log danh sách khuyến mãi để kiểm tra
+    console.log('Available discounts:', discounts.map(d => ({
+      code: d.discountCode,
+      name: d.discountName,
+      value: d.discountValue,
+      category: d.applicableCategory || d.aplicableCategory || 'None'
+    })));
+
+    // Lọc các khuyến mãi áp dụng cho sản phẩm này
+    const applicableDiscounts = discounts.filter(discount => {
+      // Ưu tiên sử dụng applicableCategory, nếu không có thì dùng aplicableCategory
+      const categoryField = discount.applicableCategory || discount.aplicableCategory;
+
+      // Log chi tiết để debug
+      console.log(`Discount: ${discount.discountName}`);
+      console.log(`- Discount category (raw): applicableCategory=${discount.applicableCategory}, aplicableCategory=${discount.aplicableCategory}`);
+      console.log(`- Discount category (used): ${categoryField}`);
+      console.log(`- Product category: ${product.productCategory}`);
+      console.log(`- Match: ${categoryField === product.productCategory}`);
+
+      // Nếu discount áp dụng cho loại sản phẩm cụ thể, kiểm tra nếu loại sản phẩm khớp
+      if (categoryField) {
+        return categoryField === product.productCategory;
+      }
+      // Không áp dụng discount không có loại sản phẩm cụ thể
+      return false;
+    });
+
+    // Log các khuyến mãi áp dụng được
+    console.log(`Applicable discounts for ${product.productName}:`,
+      applicableDiscounts.map(d => d.discountCode));
+
+    if (applicableDiscounts.length === 0) return undefined;
+
+    // Chuyển đổi giá sản phẩm từ string sang number nếu cần
+    const originalPrice = typeof product.productPrice === 'string'
+      ? parseInt(product.productPrice.replace(/,/g, ''))
+      : product.productPrice;
+
+    // Tính tổng giảm giá từ tất cả các khuyến mãi
+    let totalDiscount = 0;
+    applicableDiscounts.forEach(discount => {
+      const discountValue = parseInt(discount.discountValue);
+      console.log(`Applying discount ${discount.discountCode} (${discount.discountName}): ${discountValue}`);
+      totalDiscount += discountValue;
+    });
+
+    // Giá sau khi giảm (không cho phép giá âm)
+    const discountedPrice = Math.max(0, originalPrice - totalDiscount);
+    console.log(`Original price: ${originalPrice}, Total discount: ${totalDiscount}, Discounted price: ${discountedPrice}`);
+
+    return discountedPrice;
+  };
+
   // Fetch danh sách sản phẩm theo category
   const fetchProductsByCategory = async (categoryId = null) => {
     setLoading(true);
@@ -49,8 +134,17 @@ const ProductsPage = () => {
       setTotalPages(Math.ceil(data.data.length / ITEMS_PER_PAGE));
 
       if (Array.isArray(data.data)) {
-        setProducts(data.data);
-        sortAndPaginateProducts(data.data, sortOption, currentPage);
+        // Thêm thông tin giá khuyến mãi vào mỗi sản phẩm
+        const productsWithDiscount = data.data.map(product => {
+          const discountedPrice = calculateDiscountedPrice(product);
+          return {
+            ...product,
+            discountedPrice
+          };
+        });
+
+        setProducts(productsWithDiscount);
+        sortAndPaginateProducts(productsWithDiscount, sortOption, currentPage);
       } else {
         console.error("Products data is not in expected format");
       }
@@ -71,8 +165,17 @@ const ProductsPage = () => {
       setTotalPages(Math.ceil(data.data.length / ITEMS_PER_PAGE));
 
       if (Array.isArray(data.data)) {
-        setProducts(data.data);
-        sortAndPaginateProducts(data.data, sortOption, currentPage);
+        // Thêm thông tin giá khuyến mãi vào mỗi sản phẩm
+        const productsWithDiscount = data.data.map(product => {
+          const discountedPrice = calculateDiscountedPrice(product);
+          return {
+            ...product,
+            discountedPrice
+          };
+        });
+
+        setProducts(productsWithDiscount);
+        sortAndPaginateProducts(productsWithDiscount, sortOption, currentPage);
       } else {
         console.error("Products data is not in expected format");
       }
@@ -96,7 +199,24 @@ const ProductsPage = () => {
       setCurrentCategoryName("Tất cả sản phẩm");
       fetchAllProducts();
     }
-  }, [previousCategoryId, categories]);
+  }, [previousCategoryId, categories, discounts]);
+
+  // Reload sản phẩm khi có thay đổi về khuyến mãi
+  useEffect(() => {
+    if (products.length > 0) {
+      // Cập nhật thông tin giá khuyến mãi cho sản phẩm
+      const productsWithDiscount = products.map(product => {
+        const discountedPrice = calculateDiscountedPrice(product);
+        return {
+          ...product,
+          discountedPrice
+        };
+      });
+
+      setProducts(productsWithDiscount);
+      sortAndPaginateProducts(productsWithDiscount, sortOption, currentPage);
+    }
+  }, [discounts]);
 
   // Hàm sắp xếp và phân trang sản phẩm
   const sortAndPaginateProducts = (productsToSort, option, page) => {
@@ -107,33 +227,42 @@ const ProductsPage = () => {
       switch (priceFilter) {
         case "under-100k":
           sorted = sorted.filter(product => {
-            const price = typeof product.productPrice === 'string'
-              ? parseInt(product.productPrice.replace(/,/g, ''))
-              : product.productPrice;
+            // Sử dụng giá khuyến mãi nếu có, nếu không thì dùng giá gốc
+            const price = product.discountedPrice !== undefined
+              ? product.discountedPrice
+              : (typeof product.productPrice === 'string'
+                  ? parseInt(product.productPrice.replace(/,/g, ''))
+                  : product.productPrice);
             return price < 100000;
           });
           break;
         case "100k-200k":
           sorted = sorted.filter(product => {
-            const price = typeof product.productPrice === 'string'
-              ? parseInt(product.productPrice.replace(/,/g, ''))
-              : product.productPrice;
+            const price = product.discountedPrice !== undefined
+              ? product.discountedPrice
+              : (typeof product.productPrice === 'string'
+                  ? parseInt(product.productPrice.replace(/,/g, ''))
+                  : product.productPrice);
             return price >= 100000 && price <= 200000;
           });
           break;
         case "under-500k":
           sorted = sorted.filter(product => {
-            const price = typeof product.productPrice === 'string'
-              ? parseInt(product.productPrice.replace(/,/g, ''))
-              : product.productPrice;
+            const price = product.discountedPrice !== undefined
+              ? product.discountedPrice
+              : (typeof product.productPrice === 'string'
+                  ? parseInt(product.productPrice.replace(/,/g, ''))
+                  : product.productPrice);
             return price < 500000;
           });
           break;
         case "over-500k":
           sorted = sorted.filter(product => {
-            const price = typeof product.productPrice === 'string'
-              ? parseInt(product.productPrice.replace(/,/g, ''))
-              : product.productPrice;
+            const price = product.discountedPrice !== undefined
+              ? product.discountedPrice
+              : (typeof product.productPrice === 'string'
+                  ? parseInt(product.productPrice.replace(/,/g, ''))
+                  : product.productPrice);
             return price >= 500000;
           });
           break;
@@ -146,23 +275,31 @@ const ProductsPage = () => {
     switch (option) {
       case "price-asc":
         sorted.sort((a, b) => {
-          const priceA = typeof a.productPrice === 'string'
-            ? parseInt(a.productPrice.replace(/,/g, ''))
-            : a.productPrice;
-          const priceB = typeof b.productPrice === 'string'
-            ? parseInt(b.productPrice.replace(/,/g, ''))
-            : b.productPrice;
+          const priceA = a.discountedPrice !== undefined
+            ? a.discountedPrice
+            : (typeof a.productPrice === 'string'
+                ? parseInt(a.productPrice.replace(/,/g, ''))
+                : a.productPrice);
+          const priceB = b.discountedPrice !== undefined
+            ? b.discountedPrice
+            : (typeof b.productPrice === 'string'
+                ? parseInt(b.productPrice.replace(/,/g, ''))
+                : b.productPrice);
           return priceA - priceB;
         });
         break;
       case "price-desc":
         sorted.sort((a, b) => {
-          const priceA = typeof a.productPrice === 'string'
-            ? parseInt(a.productPrice.replace(/,/g, ''))
-            : a.productPrice;
-          const priceB = typeof b.productPrice === 'string'
-            ? parseInt(b.productPrice.replace(/,/g, ''))
-            : b.productPrice;
+          const priceA = a.discountedPrice !== undefined
+            ? a.discountedPrice
+            : (typeof a.productPrice === 'string'
+                ? parseInt(a.productPrice.replace(/,/g, ''))
+                : a.productPrice);
+          const priceB = b.discountedPrice !== undefined
+            ? b.discountedPrice
+            : (typeof b.productPrice === 'string'
+                ? parseInt(b.productPrice.replace(/,/g, ''))
+                : b.productPrice);
           return priceB - priceA;
         });
         break;
@@ -280,6 +417,7 @@ const ProductsPage = () => {
         productCategory,
         productDescription,
         productPrice,
+        discountedPrice,
       } = selectedProduct;
       navigate("/view-product-detail", {
         state: {
@@ -290,6 +428,7 @@ const ProductsPage = () => {
           productDescription,
           productCategory,
           productPrice,
+          discountedPrice,
         },
       });
     } else {
@@ -465,6 +604,11 @@ const ProductsPage = () => {
                             "/"
                           )}`;
 
+                      // Chuyển đổi giá sản phẩm từ string sang number nếu cần
+                      const price = typeof product.productPrice === 'string'
+                        ? parseInt(product.productPrice.replace(/,/g, ''))
+                        : product.productPrice;
+
                       return (
                         <CardProduct
                           key={product._id}
@@ -472,7 +616,8 @@ const ProductsPage = () => {
                           type={"primary"}
                           img={imageUrl}
                           title={product.productName}
-                          price={product.productPrice}
+                          price={price}
+                          discountedPrice={product.discountedPrice}
                           id={product._id}
                           onClick={() => handleDetail(product._id)}
                         />

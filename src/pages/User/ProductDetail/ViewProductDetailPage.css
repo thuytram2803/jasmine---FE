@@ -209,14 +209,27 @@
 }
 
 .product-detail-price {
-  font-size: 2.4rem;
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  margin-bottom: 15px;
+  font-size: 1.5rem;
   font-weight: 700;
-  color: var(--amber);
-  background-color: rgba(var(--brown100-rgb), 0.05);
-  display: inline-block;
-  padding: 8px 20px;
-  border-radius: 8px;
-  margin-bottom: 10px;
+  color: #333;
+}
+
+.original-price {
+  text-decoration: line-through;
+  color: #888;
+  margin-right: 10px;
+  font-size: 1.25rem;
+  font-weight: 400;
+}
+
+.discounted-price {
+  color: #e63946;
+  font-size: 1.75rem;
+  font-weight: 700;
 }
 
 .detail-label {

@@ -6,7 +6,7 @@ import { useDispatch } from "react-redux";
 import { addToCart } from "../../redux/slides/cartSlide";
 import { useState, useEffect } from "react";
 
-const CardProduct = ({ id, type, img, title, price, onClick }) => {
+const CardProduct = ({ id, type, img, title, price, discountedPrice, onClick }) => {
   const dispatch = useDispatch();
   const [isInRecommendation, setIsInRecommendation] = useState(false);
 
@@ -62,8 +62,9 @@ const CardProduct = ({ id, type, img, title, price, onClick }) => {
       });
     }
 
-    // Dispatch the action to add to cart
-    dispatch(addToCart({ id, img, title, price }));
+    // Dispatch the action to add to cart using the discounted price if available
+    const priceToUse = discountedPrice !== undefined ? discountedPrice : price;
+    dispatch(addToCart({ id, img, title, price: priceToUse, originalPrice: price }));
   };
 
   const cardStyle = {
@@ -97,6 +98,15 @@ const CardProduct = ({ id, type, img, title, price, onClick }) => {
     margin: isInRecommendation ? "0 0 5px" : undefined
   };
 
+  // Original price style with strikethrough when discount is applied
+  const originalPriceStyle = {
+    textDecoration: discountedPrice !== undefined ? "line-through" : "none",
+    color: discountedPrice !== undefined ? "#888" : undefined,
+    fontSize: discountedPrice !== undefined ? (isInRecommendation ? "11px" : "14px") : (isInRecommendation ? "13px" : undefined),
+    marginRight: discountedPrice !== undefined ? "8px" : "0",
+    fontWeight: discountedPrice !== undefined ? "400" : undefined,
+  };
+
   return (
     <Card
       id={`card-${id}`}
@@ -125,7 +135,16 @@ const CardProduct = ({ id, type, img, title, price, onClick }) => {
               textAlign: "center",
             }}
           >
-            {`${price.toLocaleString("en-US")} VND`}
+            {discountedPrice !== undefined ? (
+              <>
+                <span style={{ textDecoration: "line-through", color: "#888", fontSize: "16px", marginRight: "8px" }}>
+                  {`${price.toLocaleString("en-US")} VND`}
+                </span>
+                {`${discountedPrice.toLocaleString("en-US")} VND`}
+              </>
+            ) : (
+              `${price.toLocaleString("en-US")} VND`
+            )}
           </Card.Subtitle>
         )}
       </Card.Body>
@@ -133,9 +152,18 @@ const CardProduct = ({ id, type, img, title, price, onClick }) => {
         <div style={{ padding: isInRecommendation ? "0 8px 8px" : "0 15px 15px" }}>
           <Row style={{ display: "flex", alignItems: "center", justifyContent: "space-between", margin: 0 }}>
             <Col xs={7} style={{ display: "flex", justifyContent: "flex-start", paddingRight: isInRecommendation ? "5px" : "15px", paddingLeft: isInRecommendation ? "5px" : "15px" }}>
-              <TagPriceComponent style={{ marginTop: 0, fontSize: isInRecommendation ? "13px" : undefined }}>
-                {`${price.toLocaleString("en-US")} VND`}
-              </TagPriceComponent>
+              <div style={{ display: "flex", flexDirection: discountedPrice !== undefined ? "column" : "row", alignItems: "flex-start" }}>
+                {discountedPrice !== undefined && (
+                  <span style={originalPriceStyle}>
+                    {`${price.toLocaleString("en-US")} VND`}
+                  </span>
+                )}
+                <TagPriceComponent style={{ marginTop: 0, fontSize: isInRecommendation ? "13px" : undefined }}>
+                  {discountedPrice !== undefined
+                    ? `${discountedPrice.toLocaleString("en-US")} VND`
+                    : `${price.toLocaleString("en-US")} VND`}
+                </TagPriceComponent>
+              </div>
             </Col>
             <Col xs={5} style={{ display: "flex", justifyContent: "flex-end", paddingRight: isInRecommendation ? "5px" : "15px", paddingLeft: "0" }}>
               <Button
@@ -187,18 +215,6 @@ const CardProduct = ({ id, type, img, title, price, onClick }) => {
           </Row>
         </div>
       )}
-
-      {/* Hiệu ứng sản phẩm bay */}
-      {/* {isFlying && (
-        <div
-          className="flying-product"
-          style={{
-            ...flyStyle,
-          }}
-        >
-          <img src={img} alt={title} />
-        </div>
-      )} */}
     </Card>
   );
 };

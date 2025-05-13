@@ -262,3 +262,15 @@ td {
     margin-top: 10px;
   }
 }
+
+/* Discount price styling */
+.original-price {
+  text-decoration: line-through;
+  color: #888;
+  font-size: 0.9em;
+}
+
+.discounted-price {
+  color: #e63946;
+  font-weight: bold;
+}

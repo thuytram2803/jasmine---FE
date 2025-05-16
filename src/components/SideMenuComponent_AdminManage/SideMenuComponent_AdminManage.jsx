@@ -10,7 +10,6 @@ const SideMenuComponent_AdminManage = ({ activeTab, handleTabClick }) => {
         { id: "status", label: "Trạng thái", path: "/admin/status-list", icon: <FaCheck /> },
         { id: "category", label: "Loại sản phẩm", path: "/admin/category-list", icon: <FaList /> },
         { id: "user", label: "Danh sách người dùng", path: "/admin/user-list", icon: <FaUsers /> },
-        { id: "reviews", label: "Đánh giá sản phẩm", path: "/admin/reviews", icon: <FaStar /> },
         { id: "report", label: "Thống kê", path: "/admin/report", icon: <FaChartBar /> },
     ];
 

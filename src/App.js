@@ -12,6 +12,7 @@ import "./assets/css/reset.css";
 import "./assets/css/style.css";
 import DefaultComponent from "./components/DefaultComponent/DefaultComponent";
 import FooterComponent from "./components/FooterComponent/FooterComponent";
+import ChatbotComponent from "./components/ChatbotComponent/ChatbotComponent";
 import { routes } from "./routes";
 import { AuthProvider } from "./context/AuthContext";
 import { isJsonString } from "./utils";
@@ -166,6 +167,7 @@ function App() {
                 );
               })}
             </Routes>
+            <ChatbotComponent />
           </AuthProvider>
         </Router>
       )}

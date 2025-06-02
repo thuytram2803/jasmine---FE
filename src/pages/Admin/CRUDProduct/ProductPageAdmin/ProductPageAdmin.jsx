@@ -8,7 +8,7 @@ import axios from 'axios'; // For making API calls
 import { Button, Modal } from "react-bootstrap";
 import { getAllCategory } from "../../../../services/CategoryService";
 import { useNavigate, useLocation } from "react-router-dom";
-import { getProductsByCategory, getAllproduct } from "../../../../services/productServices";
+import { getProductsByCategory, getAllproduct, deleteProduct } from "../../../../services/productServices";
 
 const ProductPageAdmin = () => {
   const [products, setProducts] = useState([]); // State lưu danh sách sản phẩm
@@ -22,6 +22,7 @@ const ProductPageAdmin = () => {
   const [isLoading, setIsLoading] = useState(false); // State loading
   const [productsCount, setProductsCount] = useState(0); // Số lượng sản phẩm
   const ITEMS_PER_PAGE = 9; // Số sản phẩm trên mỗi trang
+  const [accessToken, setAccessToken] = useState(localStorage.getItem("accessToken"));
 
   const navigate = useNavigate();
   const location = useLocation();
@@ -215,6 +216,30 @@ const ProductPageAdmin = () => {
     }
   };
 
+  // Xử lý xóa sản phẩm
+  const handleDelete = async (productId) => {
+    const confirmDelete = window.confirm("Bạn có chắc chắn muốn xóa sản phẩm này không?");
+
+    if (confirmDelete) {
+      try {
+        // Gọi API để xóa sản phẩm
+        const response = await productService.deleteProduct(productId, accessToken);
+        if (response.status === "OK") {
+          alert("Đã xóa sản phẩm thành công!");
+          // Cập nhật lại danh sách sản phẩm
+          if (currentCategory) {
+            fetchProductsByCategory(currentCategory);
+          } else {
+            fetchAllProducts();
+          }
+        }
+      } catch (error) {
+        console.error("Lỗi khi xóa sản phẩm:", error);
+        alert("Không thể xóa sản phẩm. Vui lòng thử lại!");
+      }
+    }
+  };
+
   return (
     <div className="container-xl productadmin-container">
       <div className="productadmin">
@@ -306,6 +331,7 @@ const ProductPageAdmin = () => {
                     title={product.productName}
                     price={`${product.productPrice.toLocaleString('en-US')} VND`}
                     onUpdate={() => handleUpdate(product._id)}
+                    onDelete={() => handleDelete(product._id)}
                     productId={product._id}
                   />
                 );

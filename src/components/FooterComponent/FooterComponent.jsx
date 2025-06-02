@@ -77,10 +77,10 @@ const FooterComponent = () => {
             <h3 className="footer-heading">Đăng Ký Nhận Tin</h3>
             <p>Nhận thông tin về sách mới, sự kiện và ưu đãi đặc biệt</p>
             <div className="newsletter-form">
-              <input 
-                type="email" 
-                placeholder="Email của bạn" 
-                className="newsletter-input" 
+              <input
+                type="email"
+                placeholder="Email của bạn"
+                className="newsletter-input"
               />
               <button className="newsletter-button">Đăng Ký</button>
             </div>

@@ -293,17 +293,17 @@
     grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
     gap: 30px;
   }
-  
+
   .company-info,
   .newsletter {
     grid-column: span 1;
   }
-  
+
   .footer-bottom {
     flex-direction: column;
     text-align: center;
   }
-  
+
   .footer-bottom-links {
     justify-content: center;
   }
@@ -313,20 +313,20 @@
   .bookstore-footer {
     padding: 40px 0 20px;
   }
-  
+
   .footer-grid {
     gap: 25px;
   }
-  
+
   .newsletter-form {
     flex-direction: column;
   }
-  
+
   .newsletter-input {
     border-radius: 4px;
     margin-bottom: 10px;
   }
-  
+
   .newsletter-button {
     width: 100%;
     border-radius: 4px;

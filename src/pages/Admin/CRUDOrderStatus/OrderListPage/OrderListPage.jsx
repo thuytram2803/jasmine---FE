@@ -76,8 +76,24 @@ const OrderListPage = () => {
     try {
       const token = localStorage.getItem("access_token");
       const response = await OrderService.getAllOrders(token);
-      setOrders(response?.data || []);
-      setFilteredOrders(response?.data || []);
+
+      // Sắp xếp đơn hàng theo mã đơn (orderCode) - mã lớn nhất (mới nhất) lên đầu
+      if (response?.data && Array.isArray(response.data)) {
+        const sortedData = [...response.data].sort((a, b) => {
+          // Bỏ tiền tố "ORD-" và chuyển thành số
+          const codeA = a.orderCode ? parseInt(a.orderCode.replace("ORD-", "")) : 0;
+          const codeB = b.orderCode ? parseInt(b.orderCode.replace("ORD-", "")) : 0;
+
+          // Sắp xếp giảm dần (mới nhất lên đầu)
+          return codeB - codeA;
+        });
+
+        setOrders(sortedData);
+        setFilteredOrders(sortedData);
+      } else {
+        setOrders(response?.data || []);
+        setFilteredOrders(response?.data || []);
+      }
     } catch (err) {
       setError(err.message || "Đã xảy ra lỗi khi tải danh sách đơn hàng.");
     } finally {
@@ -126,13 +142,23 @@ const OrderListPage = () => {
 
   const handleFilter = (statusCode) => {
     setSelectedStatus(statusCode);
+    let filtered;
+
+    // Lọc theo trạng thái
     if (!statusCode) {
-      setFilteredOrders(orders); // Hiển thị tất cả đơn hàng
+      filtered = [...orders]; // Hiển thị tất cả đơn hàng
     } else {
-      setFilteredOrders(
-        orders.filter((order) => order.status?.statusCode === statusCode)
-      );
+      filtered = orders.filter((order) => order.status?.statusCode === statusCode);
     }
+
+    // Sắp xếp đơn hàng theo mã đơn (mới nhất lên đầu)
+    filtered.sort((a, b) => {
+      const codeA = a.orderCode ? parseInt(a.orderCode.replace("ORD-", "")) : 0;
+      const codeB = b.orderCode ? parseInt(b.orderCode.replace("ORD-", "")) : 0;
+      return codeB - codeA; // Sắp xếp giảm dần
+    });
+
+    setFilteredOrders(filtered);
   };
 
   // Helper function to get status badge color

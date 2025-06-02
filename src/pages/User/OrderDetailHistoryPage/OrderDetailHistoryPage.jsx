@@ -133,7 +133,7 @@ const OrderDetailHistoryPage = () => {
                 </div>
                 <div className="info-journey">
                   <label>Hành trình giao hàng</label>
-                  <p>Hoàn thành đơn hàng: {order.deliveryDate ? new Date(order.deliveryDate).toLocaleDateString() : 'N/A'}</p>
+                  <p>Ngày giao hàng dự kiến: {order.deliveryDate ? new Date(order.deliveryDate).toLocaleDateString() : 'N/A'} <span style={{color: '#666', fontStyle: 'italic'}}>(khoảng 1 tuần sau khi đặt hàng)</span></p>
                   <p>Thanh toán: {order.createdAt ? new Date(order.createdAt).toLocaleDateString() : 'N/A'}</p>
                   <p>Xác nhận đơn hàng: {order.createdAt ? new Date(order.createdAt).toLocaleDateString() : 'N/A'}</p>
                   <p>Đặt hàng: {order.createdAt ? new Date(order.createdAt).toLocaleDateString() : 'N/A'}</p>

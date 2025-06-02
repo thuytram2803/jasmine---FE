@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { Container, Row, Col, Button, Form, Card } from 'react-bootstrap';
-import { FaEye, FaCalendarAlt, FaUser, FaArrowLeft, FaReply } from 'react-icons/fa';
+import { FaEye, FaCalendarAlt, FaUser, FaArrowLeft, FaReply, FaArrowRight } from 'react-icons/fa';
 import './BlogDetailPage.css';
 import { useSelector } from 'react-redux';
 
@@ -16,6 +16,7 @@ const BlogDetailPage = () => {
   const [replyingTo, setReplyingTo] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [nextBlog, setNextBlog] = useState(null);
 
   // Get user from redux store
   const user = useSelector((state) => state.user);
@@ -30,6 +31,8 @@ const BlogDetailPage = () => {
 
         if (response.data.status === "OK") {
           setBlog(response.data.data);
+          // After fetching current blog, fetch the next blog
+          fetchNextBlog(response.data.data);
         } else {
           setError(response.data.message || "Failed to fetch blog details");
         }
@@ -43,6 +46,37 @@ const BlogDetailPage = () => {
 
     fetchBlogDetails();
   }, [id]);
+
+  // Fetch the next blog
+  const fetchNextBlog = async (currentBlog) => {
+    try {
+      // Get all blogs to find the next one
+      const response = await axios.get(`http://localhost:3001/api/blog/get-all-blogs?limit=100&page=0`);
+
+      if (response.data.status === "OK" && response.data.data.length > 0) {
+        const blogs = response.data.data;
+        // Find the index of the current blog
+        const currentIndex = blogs.findIndex(blog => blog._id === currentBlog._id);
+
+        // If current blog is found and it's not the last one, set the next blog
+        if (currentIndex !== -1 && currentIndex < blogs.length - 1) {
+          setNextBlog(blogs[currentIndex + 1]);
+        } else if (blogs.length > 0) {
+          // If it's the last blog, we can set the first blog as next (circular navigation)
+          setNextBlog(blogs[0]);
+        }
+      }
+    } catch (error) {
+      console.error("Error fetching next blog:", error);
+    }
+  };
+
+  // Handle navigation to next blog
+  const handleNextBlog = () => {
+    if (nextBlog) {
+      navigate(`/blog-detail/${nextBlog._id}`);
+    }
+  };
 
   // Fetch comments
   useEffect(() => {
@@ -190,13 +224,25 @@ const BlogDetailPage = () => {
 
   return (
     <div className="blog-detail-page">
-      <Button
-        variant="outline-primary"
-        className="back-button"
-        onClick={() => navigate(-1)}
-      >
-        <FaArrowLeft /> Quay lại
-      </Button>
+      <div className="blog-navigation">
+        <Button
+          variant="outline-primary"
+          className="back-button"
+          onClick={() => navigate(-1)}
+        >
+          <FaArrowLeft /> Quay lại
+        </Button>
+
+        {nextBlog && (
+          <Button
+            variant="outline-primary"
+            className="next-blog-button"
+            onClick={handleNextBlog}
+          >
+            Bài viết tiếp theo <FaArrowRight />
+          </Button>
+        )}
+      </div>
 
       <Row>
         <Col lg={12} className="blog-main">

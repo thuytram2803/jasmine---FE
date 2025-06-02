@@ -166,6 +166,7 @@ const PaymentResult = () => {
             <p><strong>Số tiền:</strong> {codPayment.amount.toLocaleString()} VND</p>
             <p><strong>Phương thức thanh toán:</strong> Thanh toán khi nhận hàng (COD)</p>
             <p><strong>Trạng thái:</strong> Đang xử lý</p>
+            <p><strong>Thời gian giao hàng dự kiến:</strong> <span style={{color: '#007bff'}}>Khoảng 1 tuần kể từ ngày đặt hàng</span></p>
             <p className="cod-instruction">
               Quý khách sẽ thanh toán khi nhận hàng. Vui lòng chuẩn bị đúng số tiền khi nhận hàng.
             </p>
@@ -196,6 +197,7 @@ const PaymentResult = () => {
               <p><strong>Mã phản hồi:</strong> {result.code}</p>
               <p><strong>Trạng thái:</strong> {getStatusText(result.code, paymentMethod, result)}</p>
               <p><strong>Phương thức thanh toán:</strong> {paymentMethod}</p>
+              {isSuccess && <p><strong>Thời gian giao hàng dự kiến:</strong> <span style={{color: '#007bff'}}>Khoảng 1 tuần kể từ ngày đặt hàng</span></p>}
               {paymentMethod === "VNPAY" && result.data && (
                 <>
                   <p><strong>Mã giao dịch:</strong> {result.data.vnp_TxnRef}</p>

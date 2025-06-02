@@ -298,7 +298,18 @@ const PaymentPage = () => {
                 <p><strong>Số điện thoại:</strong> {shippingAddress?.userPhone}</p>
                 <p><strong>Địa chỉ:</strong> {shippingAddress?.userAddress}, {shippingAddress?.userWard}, {shippingAddress?.userDistrict}, {shippingAddress?.userCity}</p>
                 <p><strong>Email:</strong> {shippingAddress?.userEmail}</p>
+                <p><strong>Thời gian giao hàng dự kiến:</strong> <span style={{color: '#007bff'}}>Khoảng 1 tuần kể từ ngày đặt hàng</span></p>
               </div>
+            </div>
+          )}
+
+          {/* Delivery Information - Show for all payment methods */}
+          {selectedPaymentMethod !== "cod" && (
+            <div className="delivery-info" style={{marginTop: '20px', padding: '15px', backgroundColor: '#f8f9fa', borderRadius: '5px'}}>
+              <h3 style={{marginBottom: '10px', color: '#333'}}>Thông tin giao hàng</h3>
+              <p><strong>Người nhận:</strong> {shippingAddress?.familyName} {shippingAddress?.userName}</p>
+              <p><strong>Địa chỉ:</strong> {shippingAddress?.userAddress}, {shippingAddress?.userWard}, {shippingAddress?.userDistrict}, {shippingAddress?.userCity}</p>
+              <p><strong>Thời gian giao hàng dự kiến:</strong> <span style={{color: '#007bff'}}>Khoảng 1 tuần kể từ ngày đặt hàng</span></p>
             </div>
           )}
 

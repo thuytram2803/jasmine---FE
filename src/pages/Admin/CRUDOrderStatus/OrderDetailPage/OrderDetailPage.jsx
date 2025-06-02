@@ -226,6 +226,9 @@ const OrderDetailPage = () => {
                     {order.deliveryDate
                       ? new Date(order.deliveryDate).toLocaleDateString()
                       : "Chưa xác định"}
+                    <span style={{color: '#666', fontStyle: 'italic', fontSize: '14px', marginLeft: '5px'}}>
+                      (khoảng 1 tuần sau khi đặt hàng)
+                    </span>
                   </label>
                 </div>
                 <div className="info-row">

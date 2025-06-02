@@ -52,6 +52,10 @@ const OrderInformationPage = () => {
       return;
     }
 
+    // Tự động tính ngày giao hàng dự kiến là 1 tuần kể từ ngày đặt hàng
+    const expectedDeliveryDate = new Date();
+    expectedDeliveryDate.setDate(expectedDeliveryDate.getDate() + 7); // Thêm 7 ngày
+
     const orderData = {
       orderItems: selectedProducts.map((product) => ({
         product: product.id, // Gắn ID của sản phẩm vào trường `product`
@@ -65,8 +69,8 @@ const OrderInformationPage = () => {
       shippingAddress,
       paymentMethod: "Online Payment",
       userId: user?.id || null,
-      deliveryDate,
-      deliveryTime,
+      deliveryDate: expectedDeliveryDate.toISOString().split('T')[0], // Format: YYYY-MM-DD
+      deliveryTime: "08:00", // Giờ giao hàng mặc định
       orderNote,
       shippingPrice: 30000,
       totalItemPrice,
@@ -115,8 +119,6 @@ const OrderInformationPage = () => {
   console.log("shippingAddress", shippingAddress);
 
   const [orderNote, setOrderNote] = useState("");
-  const [deliveryDate, setDeliveryDate] = useState("");
-  const [deliveryTime, setDeliveryTime] = useState("");
 
   // Tổng tiền hàng
   console.log("selectedPro", selectedProducts);
@@ -176,10 +178,6 @@ const OrderInformationPage = () => {
       setShippingAddress((prev) => ({ ...prev, [field]: value }));
     }
   };
-
-  // Hàm cập nhật ngày và giờ giao hàng
-  const handleDeliveryDateChange = (e) => setDeliveryDate(e.target.value);
-  const handleDeliveryTimeChange = (e) => setDeliveryTime(e.target.value);
 
   // Hàm cập nhật ghi chú
   const handleOrderNoteChange = (e) => setOrderNote(e.target.value);
@@ -334,26 +332,10 @@ const OrderInformationPage = () => {
         {/* =====Thoi gian giao hang==== */}
         <div className="DeliveryTimeHolder">
           <p className="ThoiGian">Thời gian giao hàng dự kiến:</p>
-          <div className="d-flex" style={{ gap: "50px", margin: "20px 0" }}>
-            <div>
-              <h3>Chọn giờ:</h3>
-              <input
-                type="time"
-                className="clock"
-                value={deliveryTime}
-                onChange={handleDeliveryTimeChange}
-              ></input>
-            </div>
-            <div>
-              <h3>Chọn ngày:</h3>
-              <input
-                type="date"
-                id="datePicker"
-                className="Datepicker"
-                value={deliveryDate}
-                onChange={handleDeliveryDateChange}
-              />
-            </div>
+          <div className="delivery-message" style={{ margin: "20px 0", padding: "10px", backgroundColor: "#f8f9fa", borderRadius: "5px" }}>
+            <p style={{ fontSize: "16px", color: "#333", marginBottom: "0" }}>
+              Đơn hàng của bạn sẽ được giao trong vòng <strong>1 tuần</strong> kể từ ngày đặt hàng.
+            </p>
           </div>
         </div>
         {/* ============Ghi chu don hang======== */}

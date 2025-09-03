@@ -67,21 +67,23 @@ export const getBookDetails = async (productId) => {
  */
 export const processGoogleAloudQuery = async (query) => {
   try {
-    const API_KEY = process.env.REACT_APP_GEMINI_API_KEY || 'AIzaSyBCMnBzmrxDbV--WttfdzxHKjx6nFUH-Ik';
+    const API_KEY = process.env.REACT_APP_GEMINI_API_KEY;
 
     // Using Gemini 1.5 Flash model
+    // 1
     const MODEL = 'gemini-1.5-flash-002';
     const API_URL = `https://generativelanguage.googleapis.com/v1/models/${MODEL}:generateContent?key=${API_KEY}`;
 
-    console.log("Connecting to Google Gemini API with model:", MODEL);
+    
 
     // Prepare the prompt with instructions for the AI assistant
+    // 2
     const prompt = `
       Bạn là trợ lý AI "Jasmine" của hiệu sách trực tuyến BookStore. Bạn có các chức năng sau:
 
       1. Giúp khách hàng tìm sách:
          - Khi khách hỏi về một cuốn sách, tên tác giả, hoặc thể loại, hãy cung cấp thông tin và gợi ý truy cập đường dẫn:
-         - Đường dẫn trang sản phẩm: http://localhost:3000/products
+         - Đường dẫn trang sản phẩm: http://localhost:3000/products ( chỉ cung cấp 1 lần vào cuối đoạn chat nếu cần)
          - Nếu khách hỏi về sách cụ thể, hãy gợi ý "Bạn có thể xem chi tiết sách tại [đường dẫn]"
 
       2. Gợi ý sách tương tự:
@@ -141,6 +143,7 @@ export const processGoogleAloudQuery = async (query) => {
           +PYOTR - ĐẠI ĐẾ: 160000
           +LỊCH SỬ ĐẢNG CỘNG SẢN VN:85000
        - thể loại tiểu thuyết:
+          +CHIẾC XE SẮT: 70000vnd
        - thể loại giáo dục:
          +Giáo dục thể chất: 770000vnd
          +MĨ THUẬT: 55000vnd
@@ -155,12 +158,21 @@ export const processGoogleAloudQuery = async (query) => {
       - Nếu không biết thông tin về một cuốn sách cụ thể, gợi ý khách hàng tìm kiếm trên trang sản phẩm của website
       - Nếu khách hỏi về chủ đề không liên quan đến hiệu sách, vẫn trả lời thân thiện và hữu ích
 
+    10. có thể chèn thêm các icon để tin nhắn được sinh động hơn
+
+    11. Nếu người dùng hỏi về các thông tin của sách mà bạn chưa được train trước đó thì có thể search để lấy thông tin từ google hoặc từ thông tin của bạn để trả lời rõ thông tin về sách đó.
+
+    12. Các sách dang bán chạy nhất của jasmine 
+        - Lược sử kinh tế học
+        - Những người khốn khổ
+        - Triết học
+        Chỉ dẫn link đến cửa hàng một lần tại cuối đoạn chat
+    13. Nếu bạn không có câu trả lời được câu hỏi (kể cả search rồi) thì hiển thị vui lòng liên hệ thêm chứ đừng chat hỏi ngược lại người dùng
       Câu hỏi của khách hàng: ${query}
-    `;
+    14. Nếu khách muốn biết thông tin cụ thể về một cuốn sách nào đó thì bạn cứ trả lời theo những gì bạn search và nếu cuốn sách mà khách hỏi hiện chưa có trong cửa hàng thì thông báo cho khách "Rất tiếc, cuốn sách mà bạn đang tìm kiếm hiện tại chưa có trong cửa hàng. Bạn có thể tham khảo các sách khác tương tự trong cửa hàng nhé". Và dẫn link đến trang sản phẩm của cửa hàng để khách có thể xem thêm các sách khác.
+    `;    
 
-    // Log request for debugging
-    console.log("Sending request to Gemini API with query:", query);
-
+    //3
     const apiRequest = {
       contents: [
         {
@@ -176,7 +188,8 @@ export const processGoogleAloudQuery = async (query) => {
         maxOutputTokens: 800,
       }
     };
-
+ 
+   //4
     const response = await axios.post(
       API_URL,
       apiRequest,
@@ -187,10 +200,8 @@ export const processGoogleAloudQuery = async (query) => {
       }
     );
 
-    // Log success
-    console.log("Received successful response from Gemini API");
-
     // Extract the response text from the Gemini API response
+    //5
     let responseText = '';
     if (response.data &&
         response.data.candidates &&
@@ -198,10 +209,8 @@ export const processGoogleAloudQuery = async (query) => {
         response.data.candidates[0].content &&
         response.data.candidates[0].content.parts &&
         response.data.candidates[0].content.parts[0]) {
-      responseText = response.data.candidates[0].content.parts[0].text;
-      console.log("Successfully extracted response text from Gemini API");
-    } else {
-      console.error("Response format unexpected:", JSON.stringify(response.data, null, 2));
+      responseText = response.data.candidates[0].content.parts[0].text;    
+    } else {     
       throw new Error('Không tìm thấy nội dung phản hồi từ API');
     }
 

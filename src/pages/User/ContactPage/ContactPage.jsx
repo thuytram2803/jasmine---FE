@@ -14,11 +14,11 @@ const ContactPage = () => {
       <div className="contact-content">
         <div className="contact-info">
           <div className="company-info">
-            <h2>Công ty TNHH jasmine</h2>
+            <h2>Công ty TNHH Jasmine</h2>
             
             <div className="info-item">
               <FaMapMarkerAlt className="info-icon" />
-              <span>6 Lê Văn Miếu, Thảo Điền, Thủ Đức, Hồ Chí Minh</span>
+              <span>6 Lê Văn Miến, Thảo Điền, Thủ Đức, Hồ Chí Minh</span>
             </div>
             
             <div className="info-item">
